@@ -8,17 +8,17 @@ const RegistgerPage = () => {
     <>
       <div className="md:hidden">
         <img
-          src="/examples/authentication-light.png"
+          src="/hitscher_mitarbeiter.png"
           width={1280}
           height={843}
-          alt="Authentication"
+          alt="Hitscher Mitarbeiter"
           className="block dark:hidden"
         />
         <img
-          src="/examples/authentication-dark.png"
+          src="/hitscher_mitarbeiter.png"
           width={1280}
           height={843}
-          alt="Authentication"
+          alt="Hitscher Mitarbeiter"
           className="hidden dark:block"
         />
       </div>
@@ -32,32 +32,18 @@ const RegistgerPage = () => {
         >
           Login
         </Link>
-        <div className="relative flex-col hidden h-full p-10 text-white bg-muted dark:border-r lg:flex">
-          <div className="absolute inset-0 bg-zinc-900" />
-          <div className="relative z-20 flex items-center text-lg font-medium">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-6 h-6 mr-2"
-            >
-              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-            </svg>
-            Boilerplate
-          </div>
-          <div className="relative z-20 mt-auto">
-            <blockquote className="space-y-2">
-              <p className="text-lg">&ldquo;Let the games begin!&rdquo;</p>
-              <footer className="text-sm">Bot No. 1</footer>
-            </blockquote>
-          </div>
+        <div className="relative hidden h-full overflow-hidden lg:block">
+          <img
+            src="/hitscher_mitarbeiter.png"
+            alt="Hitscher Mitarbeiter"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         </div>
         <div className="lg:p-8">
           <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+            <div className="flex justify-center">
+              <img src="/hitscher_logo.png" alt="Gartenbau Hitscher" className="h-80 w-auto" />
+            </div>
             <div className="flex flex-col space-y-2 text-center">
               <h1 className="text-2xl font-semibold tracking-tight">Create Account</h1>
               <p className="text-sm text-muted-foreground">

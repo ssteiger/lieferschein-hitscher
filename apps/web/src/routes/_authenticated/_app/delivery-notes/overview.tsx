@@ -152,8 +152,8 @@ const DeliveryNotesPage = () => {
       ) : (
         <>
           {isLoading ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {['a', 'b', 'c', 'd', 'e', 'f'].map((key) => (
+            <div className="mx-auto max-w-3xl space-y-4">
+              {['a', 'b', 'c'].map((key) => (
                 <Card key={key} className="animate-pulse">
                   <CardHeader>
                     <div className="bg-muted h-4 w-24 rounded" />
@@ -163,7 +163,7 @@ const DeliveryNotesPage = () => {
               ))}
             </div>
           ) : deliveryNotes?.length ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mx-auto max-w-3xl space-y-4">
               {deliveryNotes.map((note) => (
                 <DeliveryNoteCard key={note.id} note={note} />
               ))}

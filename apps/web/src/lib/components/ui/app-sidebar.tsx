@@ -66,7 +66,10 @@ export function AppSidebar({ variant = 'inset' }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <div className="mt-auto flex justify-center">
+          <img src="/hitscher_logo.png" alt="Gartenbau Hitscher" className="h-[70%] w-auto" />
+        </div>
+        <NavSecondary items={data.navSecondary} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

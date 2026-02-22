@@ -1,10 +1,8 @@
 import {
   BellIcon,
-  CreditCardIcon,
   DatabaseIcon,
   LogOutIcon,
   MoreVerticalIcon,
-  UserCircleIcon,
 } from 'lucide-react'
 import { redirect } from '@tanstack/react-router'
 
@@ -107,14 +105,6 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <UserCircleIcon />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
                 <BellIcon />
                 Notifications
               </DropdownMenuItem>
@@ -130,7 +120,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logOutMutation.mutateAsync()}>
+            <DropdownMenuItem onClick={() => logOutMutation.mutate({})}>
               <LogOutIcon />
               Log out
             </DropdownMenuItem>

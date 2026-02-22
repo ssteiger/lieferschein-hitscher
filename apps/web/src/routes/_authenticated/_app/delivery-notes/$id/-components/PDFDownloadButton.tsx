@@ -145,8 +145,6 @@ async function downloadPdf(deliveryNote: PDFDownloadButtonProps['deliveryNote'])
                       { text: 'Ralf Hitscher', fontSize: 9 },
                       { text: 'Süderquerweg 484', fontSize: 9 },
                       { text: '21037 Hamburg', fontSize: 9 },
-                      { text: '', margin: [0, 4, 0, 0] as [number, number, number, number] },
-                      { text: 'Pflanzenpass: DE-HH1-110071', fontSize: 8 },
                     ],
                     margin: [6, 6, 6, 6] as [number, number, number, number],
                   },
@@ -179,7 +177,7 @@ async function downloadPdf(deliveryNote: PDFDownloadButtonProps['deliveryNote'])
                   {
                     columns: [
                       { text: 'Lieferschein Nr:', bold: true, fontSize: 10, width: 'auto' },
-                      { text: deliveryNote.lieferschein_nr || '', fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+                      { text: deliveryNote.lieferschein_nr || '', fontSize: 10, width: '*', margin: [4, 0, 0, 0] as [number, number, number, number] },
                     ],
                     margin: [4, 4, 4, 4] as [number, number, number, number],
                   },
@@ -276,6 +274,17 @@ async function downloadPdf(deliveryNote: PDFDownloadButtonProps['deliveryNote'])
               { text: 'Einzelpreis\nin \u20AC', bold: true, fontSize: 9, alignment: 'center' as const, margin: [2, 0, 2, 2] as [number, number, number, number], border: [true, false, true, true] },
             ],
             ...itemRows,
+            [
+              {
+                text: 'Pflanzenpass: DE-HH1-110071',
+                fontSize: 8,
+                alignment: 'center' as const,
+                colSpan: 8,
+                margin: [0, 4, 0, 4] as [number, number, number, number],
+                border: [false, false, false, false],
+              },
+              ...Array(7).fill({ text: '', border: [false, false, false, false] }),
+            ],
           ],
         },
         // 0.5pt thin borders for the item grid

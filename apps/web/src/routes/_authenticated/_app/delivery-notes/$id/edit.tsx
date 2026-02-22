@@ -237,10 +237,13 @@ function EditForm({
           />
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4 sm:static sm:border-0 sm:bg-transparent sm:p-0">
+        <div className="flex flex-col gap-3">
           <Button className="w-full" size="lg" onClick={handleSubmit} disabled={mutation.isPending}>
             <SaveIcon className="mr-2 h-4 w-4" />
             {mutation.isPending ? 'Wird gespeichert...' : 'Speichern'}
+          </Button>
+          <Button className="w-full" variant="outline" size="lg" onClick={() => navigate({ to: '/delivery-notes/$id', params: { id: noteId } })}>
+            Abbrechen
           </Button>
         </div>
 

@@ -60,8 +60,8 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
     <div ref={ref} className="space-y-3 print:space-y-2 print:p-0 print:text-black">
       {/* Row 1: Warenempfänger (left) + Lieferant (right) */}
       <div className="grid grid-cols-[1fr_1fr] gap-4">
-        <div className="border border-black">
-          <div className="border-b border-black bg-gray-50 px-3 py-1.5 text-center text-sm font-bold">
+        <div className="border border-foreground">
+          <div className="border-b border-foreground bg-muted px-3 py-1.5 text-center text-sm font-bold">
             Warenempfänger:
           </div>
           <div className="flex items-start gap-3 p-3">
@@ -73,8 +73,8 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
             <img src="/loest_logo.jpg" alt="Loest Logo" className="h-10 w-auto" />
           </div>
         </div>
-        <div className="border border-black">
-          <div className="border-b border-black bg-gray-50 px-3 py-1.5 text-center text-sm font-bold">
+        <div className="border border-foreground">
+          <div className="border-b border-foreground bg-muted px-3 py-1.5 text-center text-sm font-bold">
             Lieferant:
           </div>
           <div className="p-3 text-xs leading-relaxed">
@@ -90,26 +90,22 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
         <button
           type="button"
           disabled={disabled}
-          className="flex items-center gap-2 border border-black px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
+          className="flex items-center gap-2 border border-foreground px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
           onClick={() => setLieferscheinNrDrawerOpen(true)}
         >
           <span className="text-sm font-bold whitespace-nowrap">Lieferschein Nr:</span>
-          <span className="text-sm border-b border-black px-1 flex-1">
-            {lieferscheinNr || <span className="text-muted-foreground">{disabled ? '—' : 'z.B. 2026-001'}</span>}
-          </span>
+          {lieferscheinNr || <span className="text-muted-foreground">{disabled ? '—' : 'z.B. 2026-001'}</span>}
         </button>
         <button
           type="button"
           disabled={disabled}
-          className="flex items-center gap-2 border border-black px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
+          className="flex items-center gap-2 border border-foreground px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
           onClick={() => setDateDrawerOpen(true)}
         >
           <span className="text-sm font-bold whitespace-nowrap">Hamburg, den</span>
-          <span className="text-sm border-b border-black px-1 flex-1">
-            {deliveryDate
-              ? new Date(deliveryDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-              : <span className="text-muted-foreground">{disabled ? '—' : 'Datum wählen'}</span>}
-          </span>
+          {deliveryDate
+            ? new Date(deliveryDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            : <span className="text-muted-foreground">{disabled ? '—' : 'Datum wählen'}</span>}
         </button>
       </div>
 
@@ -117,22 +113,22 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>
-            <th className="border border-black px-2 py-1 text-left text-xs font-bold">
+            <th className="border border-foreground px-2 py-1 text-left text-xs font-bold">
               Artikel und Topfgröße
             </th>
-            <th colSpan={6} className="border border-black px-2 py-1 text-center text-xs font-bold">
+            <th colSpan={6} className="border border-foreground px-2 py-1 text-center text-xs font-bold">
               Stück / VPE
             </th>
-            <th className="border-t border-l border-r border-black border-b-0 px-2 py-1 text-center text-xs font-bold">
+            <th className="border-t border-l border-r border-foreground border-b-0 px-2 py-1 text-center text-xs font-bold">
               Netto
             </th>
           </tr>
           <tr>
-            <th className="border border-black px-2 py-1 text-left text-xs font-bold align-middle">
+            <th className="border border-foreground px-2 py-1 text-left text-xs font-bold align-middle">
               Bestellnummer
             </th>
             {[0, 1, 2, 3, 4, 5].map((pos) => (
-              <th key={`chunk${pos}`} className="border border-black p-0.5 text-center">
+              <th key={`chunk${pos}`} className="border border-foreground p-0.5 text-center">
                 <Input
                   className="h-8 w-full border-0 shadow-none text-center text-lg font-extrabold px-0 focus-visible:ring-0"
                   inputMode="numeric"
@@ -143,7 +139,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
                 />
               </th>
             ))}
-            <th className="border-b border-l border-r border-black border-t-0 px-2 py-1 text-center text-xs font-bold">
+            <th className="border-b border-l border-r border-foreground border-t-0 px-2 py-1 text-center text-xs font-bold">
               Einzelpreis
               <br />
               in €
@@ -154,7 +150,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
         <tbody>
           {items.map((item, index) => (
             <tr key={item.article_name} className="group">
-              <td className="border border-black px-2 py-1 text-xs">
+              <td className="border border-foreground px-2 py-1 text-xs">
                 <div className="flex items-center justify-between">
                   <span>{item.article_name}</span>
                   {!disabled && (
@@ -172,7 +168,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
               {[0, 1, 2, 3, 4, 5].map((chunkIdx) => {
                 const chunkEmpty = !bestellChunks[chunkIdx]
                 return (
-                  <td key={`q${chunkIdx}`} className={`border border-black px-0.5 py-0.5 ${chunkEmpty ? 'bg-muted' : ''}`}>
+                  <td key={`q${chunkIdx}`} className={`border border-foreground px-0.5 py-0.5 ${chunkEmpty ? 'bg-muted' : ''}`}>
                     <Input
                       type="text"
                       disabled={disabled || chunkEmpty}
@@ -183,7 +179,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
                   </td>
                 )
               })}
-              <td className="border border-black px-1 py-0.5">
+              <td className="border border-foreground px-1 py-0.5">
                 <button
                   type="button"
                   disabled={disabled}
