@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import { ArrowRight, Github, LoaderCircle } from 'lucide-react'
+import { Fingerprint, LoaderCircle } from 'lucide-react'
 import * as React from 'react'
 import { toast } from 'sonner'
 
@@ -8,89 +8,86 @@ import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
 import { Label } from '~/lib/components/ui/label'
 import { cn } from '~/lib/utils/cn'
-import { loginFn, oauthFn, verifyCodeFn } from '../../login/-components/user-auth-form'
+import { authClient } from '~/lib/auth-client'
 
-// Add members to interface or use type directly
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>
 
 export function UserAuthFormRegister({ className, ...props }: UserAuthFormProps) {
-  const [email, setEmail] = React.useState<string>('')
-  const [verificationCode, setVerificationCode] = React.useState<string>('')
-  const [isEmailSent, setIsEmailSent] = React.useState<boolean>(false)
+  const [name, setName] = React.useState('')
+  const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
+  const [isRegistered, setIsRegistered] = React.useState(false)
   const router = useRouter()
 
-  // Email signup mutation - updated to passwordless
-  const emailSignup = useMutation({
-    mutationFn: async (variables: { email: string }) => {
-      return await loginFn({ data: variables })
+  const registerMutation = useMutation({
+    mutationFn: async (variables: { name: string; email: string; password: string }) => {
+      const { data, error } = await authClient.signUp.email({
+        name: variables.name,
+        email: variables.email,
+        password: variables.password,
+      })
+      if (error) throw new Error(error.message)
+      return data
     },
     onSuccess: () => {
-      setIsEmailSent(true)
-      toast.success('Registration verification code sent to your email')
+      setIsRegistered(true)
+      toast.success('Account created successfully')
     },
     onError: (error) => {
       toast.error(`Registration failed: ${error.message}`)
     },
   })
 
-  // Verification code registration mutation
-  const verifyCodeMutation = useMutation({
-    mutationFn: async (variables: { email: string; code: string }) => {
-      return await verifyCodeFn({ data: variables })
+  const addPasskeyMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await authClient.passkey.addPasskey({
+        name: `${name}'s passkey`,
+      })
+      if (error) throw new Error(error.message)
+      return data
     },
     onSuccess: () => {
-      toast.success('Registration successful')
-      // Redirect the user after successful verification
+      toast.success('Passkey registered successfully')
       router.navigate({ to: '/' })
     },
     onError: (error) => {
-      toast.error(`Verification failed: ${error.message}`)
+      toast.error(`Passkey registration failed: ${error.message}`)
     },
   })
 
-  // GitHub OAuth mutation
-  const githubSignIn = useMutation({
-    mutationFn: async (variables: { provider: 'github' }) => {
-      return await oauthFn({ data: variables })
-    },
-    onError: (error) => {
-      toast.error(`GitHub sign-in failed: ${error.message}`)
-    },
-  })
-
-  // Combined error from any mutation
   const error =
-    emailSignup.error?.message ||
-    githubSignIn.error?.message ||
-    verifyCodeMutation.error?.message ||
-    null
+    registerMutation.error?.message || addPasskeyMutation.error?.message || null
 
-  // Combined loading state
-  const isLoading = emailSignup.isPending || githubSignIn.isPending || verifyCodeMutation.isPending
+  const isLoading = registerMutation.isPending || addPasskeyMutation.isPending
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
-    emailSignup.mutate({ email })
-  }
-
-  async function onVerifyCode(event: React.SyntheticEvent) {
-    event.preventDefault()
-    verifyCodeMutation.mutate({ email, code: verificationCode })
+    registerMutation.mutate({ name, email, password })
   }
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
-      {error && <div className="p-3 text-sm text-red-500 rounded-md bg-red-50">{error}</div>}
+      {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-500">{error}</div>}
 
-      {isEmailSent && (
-        <div className="p-3 text-sm text-green-600 rounded-md bg-green-50">
-          Check your email for a registration link or verification code.
-        </div>
-      )}
-
-      {!isEmailSent ? (
+      {!isRegistered ? (
         <form onSubmit={onSubmit}>
           <div className="grid gap-2">
+            <div className="grid gap-1">
+              <Label className="sr-only" htmlFor="name">
+                Name
+              </Label>
+              <Input
+                id="name"
+                placeholder="Full name"
+                type="text"
+                autoCapitalize="words"
+                autoComplete="name"
+                disabled={isLoading}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
             <div className="grid gap-1">
               <Label className="sr-only" htmlFor="email">
                 Email
@@ -108,74 +105,51 @@ export function UserAuthFormRegister({ className, ...props }: UserAuthFormProps)
                 required
               />
             </div>
-            <Button disabled={isLoading} type="submit">
-              {isLoading && <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />}
-              Continue with Email
-            </Button>
-          </div>
-        </form>
-      ) : (
-        <form onSubmit={onVerifyCode}>
-          <div className="grid gap-2">
             <div className="grid gap-1">
-              <Label htmlFor="verificationCode">Verification Code</Label>
+              <Label className="sr-only" htmlFor="password">
+                Password
+              </Label>
               <Input
-                id="verificationCode"
-                placeholder="Enter the code from your email"
-                type="text"
-                autoCapitalize="none"
-                autoCorrect="off"
+                id="password"
+                placeholder="Password"
+                type="password"
+                autoComplete="new-password"
                 disabled={isLoading}
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
             <Button disabled={isLoading} type="submit">
-              {verifyCodeMutation.isPending && (
-                <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />
+              {registerMutation.isPending && (
+                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Verify and Register
-            </Button>
-            <Button variant="outline" type="button" onClick={() => setIsEmailSent(false)}>
-              Back
+              Create Account
             </Button>
           </div>
         </form>
-      )}
-
-      {isEmailSent && (
-        <a href="http://localhost:54324/" target="_blank" rel="noreferrer">
-          <Button size="sm" variant="outline" className="w-full">
-            Open local email client <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </a>
-      )}
-
-      {!isEmailSent && (
-        <>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
-            </div>
+      ) : (
+        <div className="grid gap-4">
+          <div className="rounded-md bg-green-50 p-3 text-sm text-green-600">
+            Account created! You can now add a passkey for faster logins, or continue to the app.
           </div>
           <Button
             variant="outline"
             type="button"
             disabled={isLoading}
-            onClick={() => githubSignIn.mutate({ provider: 'github' })}
+            onClick={() => addPasskeyMutation.mutate()}
           >
-            {isLoading ? (
-              <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />
+            {addPasskeyMutation.isPending ? (
+              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Github className="w-4 h-4 mr-2" />
+              <Fingerprint className="mr-2 h-4 w-4" />
             )}{' '}
-            GitHub
+            Register a Passkey
           </Button>
-        </>
+          <Button type="button" onClick={() => router.navigate({ to: '/' })}>
+            Continue to App
+          </Button>
+        </div>
       )}
     </div>
   )

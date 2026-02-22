@@ -15,6 +15,13 @@
       "when": 1771769803432,
       "tag": "0001_superb_phil_sheldon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771781333097,
+      "tag": "0002_gray_karnak",
+      "breakpoints": true
     }
   ]
 }

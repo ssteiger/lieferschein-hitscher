@@ -1,5 +1,4 @@
 import {
-  ClipboardListIcon,
   FileTextIcon,
   PlusCircleIcon,
   SettingsIcon,

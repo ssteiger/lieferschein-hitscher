@@ -34,6 +34,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      account: {
+        Row: {
+          accessToken: string | null
+          accessTokenExpiresAt: string | null
+          accountId: string
+          createdAt: string
+          id: string
+          idToken: string | null
+          password: string | null
+          providerId: string
+          refreshToken: string | null
+          refreshTokenExpiresAt: string | null
+          scope: string | null
+          updatedAt: string
+          userId: string
+        }
+        Insert: {
+          accessToken?: string | null
+          accessTokenExpiresAt?: string | null
+          accountId: string
+          createdAt?: string
+          id: string
+          idToken?: string | null
+          password?: string | null
+          providerId: string
+          refreshToken?: string | null
+          refreshTokenExpiresAt?: string | null
+          scope?: string | null
+          updatedAt?: string
+          userId: string
+        }
+        Update: {
+          accessToken?: string | null
+          accessTokenExpiresAt?: string | null
+          accountId?: string
+          createdAt?: string
+          id?: string
+          idToken?: string | null
+          password?: string | null
+          providerId?: string
+          refreshToken?: string | null
+          refreshTokenExpiresAt?: string | null
+          scope?: string | null
+          updatedAt?: string
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           id: string
@@ -117,6 +173,154 @@ export type Database = {
           lieferschein_nr?: string | null
           notes?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      passkey: {
+        Row: {
+          aaguid: string | null
+          backedUp: boolean
+          counter: number
+          createdAt: string | null
+          credentialID: string
+          deviceType: string
+          id: string
+          name: string | null
+          publicKey: string
+          transports: string | null
+          userId: string
+        }
+        Insert: {
+          aaguid?: string | null
+          backedUp: boolean
+          counter: number
+          createdAt?: string | null
+          credentialID: string
+          deviceType: string
+          id: string
+          name?: string | null
+          publicKey: string
+          transports?: string | null
+          userId: string
+        }
+        Update: {
+          aaguid?: string | null
+          backedUp?: boolean
+          counter?: number
+          createdAt?: string | null
+          credentialID?: string
+          deviceType?: string
+          id?: string
+          name?: string | null
+          publicKey?: string
+          transports?: string | null
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passkey_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session: {
+        Row: {
+          createdAt: string
+          expiresAt: string
+          id: string
+          ipAddress: string | null
+          token: string
+          updatedAt: string
+          userAgent: string | null
+          userId: string
+        }
+        Insert: {
+          createdAt?: string
+          expiresAt: string
+          id: string
+          ipAddress?: string | null
+          token: string
+          updatedAt?: string
+          userAgent?: string | null
+          userId: string
+        }
+        Update: {
+          createdAt?: string
+          expiresAt?: string
+          id?: string
+          ipAddress?: string | null
+          token?: string
+          updatedAt?: string
+          userAgent?: string | null
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user: {
+        Row: {
+          createdAt: string
+          email: string
+          emailVerified: boolean
+          id: string
+          image: string | null
+          name: string
+          updatedAt: string
+        }
+        Insert: {
+          createdAt?: string
+          email: string
+          emailVerified?: boolean
+          id: string
+          image?: string | null
+          name: string
+          updatedAt?: string
+        }
+        Update: {
+          createdAt?: string
+          email?: string
+          emailVerified?: boolean
+          id?: string
+          image?: string | null
+          name?: string
+          updatedAt?: string
+        }
+        Relationships: []
+      }
+      verification: {
+        Row: {
+          createdAt: string
+          expiresAt: string
+          id: string
+          identifier: string
+          updatedAt: string
+          value: string
+        }
+        Insert: {
+          createdAt?: string
+          expiresAt: string
+          id: string
+          identifier: string
+          updatedAt?: string
+          value: string
+        }
+        Update: {
+          createdAt?: string
+          expiresAt?: string
+          id?: string
+          identifier?: string
+          updatedAt?: string
+          value?: string
         }
         Relationships: []
       }

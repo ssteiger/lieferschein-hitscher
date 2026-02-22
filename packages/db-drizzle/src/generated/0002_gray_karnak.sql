@@ -1,0 +1,1 @@
+ALTER TABLE "delivery_note_items" ALTER COLUMN "quantities" SET DEFAULT '["","","","","",""]'::jsonb;

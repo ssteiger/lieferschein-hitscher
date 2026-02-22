@@ -6,35 +6,22 @@ import {
   ScriptOnce,
   Scripts,
 } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import appCss from '~/lib/styles/app.css?url'
-import { getSupabaseServerClient } from '~/lib/utils/supabase/server'
-
-const getUser = createServerFn({ method: 'GET' }).handler(async () => {
-  const supabase = getSupabaseServerClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  console.log('getUser', { user })
-
-  return user || null
-})
+import { getSession } from '~/lib/auth-server'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
-  user: Awaited<ReturnType<typeof getUser>>
+  user: Awaited<ReturnType<typeof getSession>>
 }>()({
   beforeLoad: async ({ context }) => {
-    const user = await context.queryClient.fetchQuery({
-      queryKey: ['user'],
-      queryFn: () => getUser(),
-    }) // we're using react-query for caching, see router.tsx
-    return { user }
+    const session = await context.queryClient.fetchQuery({
+      queryKey: ['session'],
+      queryFn: () => getSession(),
+    })
+    return { user: session }
   },
   head: () => ({
     meta: [
@@ -46,7 +33,7 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Boilerplate',
+        title: 'Lieferschein Hitscher',
       },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
