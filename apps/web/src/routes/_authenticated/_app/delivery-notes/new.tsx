@@ -4,9 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { postgres_db, schema, eq } from '@lieferschein-hitscher/db-drizzle'
 import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
-import { Label } from '~/lib/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '~/lib/components/ui/card'
-import { Separator } from '~/lib/components/ui/separator'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { ArrowLeftIcon, SaveIcon, Trash2Icon, PlusIcon } from 'lucide-react'
@@ -17,6 +14,15 @@ interface DeliveryNoteItem {
   quantity_65: number
   quantity_85: number
   unit_price_cents: number
+}
+
+function splitBestellnummer(nr: string): string[] {
+  const digits = nr.replace(/\D/g, '').slice(0, 12)
+  const chunks: string[] = []
+  for (let i = 0; i < 12; i += 2) {
+    chunks.push(digits.slice(i, i + 2))
+  }
+  return chunks
 }
 
 interface CreateDeliveryNoteInput {
@@ -102,7 +108,7 @@ const NewDeliveryNotePage = () => {
 
   const today = new Date().toISOString().split('T')[0]
   const [lieferscheinNr, setLieferscheinNr] = useState('')
-  const [bestellnummer, setBestellnummer] = useState('')
+  const [bestellnummer, setBestellnummer] = useState('356585')
   const [deliveryDate, setDeliveryDate] = useState(today)
   const [notes, setNotes] = useState('')
   const [items, setItems] = useState<DeliveryNoteItem[]>([])
@@ -193,200 +199,194 @@ const NewDeliveryNotePage = () => {
     return Math.round(parsed * 100)
   }
 
+  const bestellChunks = splitBestellnummer(bestellnummer)
+
+  const handleChunkChange = (index: number, value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 2)
+    const chunks = splitBestellnummer(bestellnummer)
+    chunks[index] = digits
+    setBestellnummer(chunks.join(''))
+  }
+
   return (
     <div className="flex-1 p-4 pb-24">
-      <div className="mx-auto max-w-2xl space-y-6">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto max-w-3xl space-y-3">
+        <div className="flex items-center gap-3 mb-2">
           <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/delivery-notes/overview' })}>
             <ArrowLeftIcon className="h-5 w-5" />
           </Button>
           <h2 className="text-2xl font-bold">Neuer Lieferschein</h2>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Kopfdaten</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="lieferschein_nr">Lieferschein Nr.</Label>
-                <Input
-                  id="lieferschein_nr"
-                  placeholder="z.B. 2026-001"
-                  value={lieferscheinNr}
-                  onChange={(e) => setLieferscheinNr(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bestellnummer">Bestellnummer</Label>
-                <Input
-                  id="bestellnummer"
-                  inputMode="numeric"
-                  placeholder="Max. 12 Ziffern"
-                  maxLength={12}
-                  value={bestellnummer}
-                  onChange={(e) => {
-                    const v = e.target.value.replace(/\D/g, '').slice(0, 12)
-                    setBestellnummer(v)
-                  }}
-                />
-              </div>
+        {/* Row 1: Warenempfänger (left) + Lieferant (right) */}
+        <div className="grid grid-cols-[1fr_1fr] gap-4">
+          <div className="border border-black">
+            <div className="border-b border-black bg-gray-50 px-3 py-1.5 text-center text-sm font-bold">
+              Warenempfänger:
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="delivery_date">Datum</Label>
-                <Input
-                  id="delivery_date"
-                  type="date"
-                  value={deliveryDate}
-                  onChange={(e) => setDeliveryDate(e.target.value)}
-                />
+            <div className="flex items-start gap-3 p-3">
+              <div className="flex-1 text-xs leading-relaxed">
+                <p>Loest Blumengrosshandel e.K.</p>
+                <p>Kirchwerder Marschbahndamm 300</p>
+                <p>21037 Hamburg</p>
               </div>
+              <img src="/loest_logo.jpg" alt="Loest Logo" className="h-10 w-auto" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notizen</Label>
-              <Input
-                id="notes"
-                placeholder="Optionale Notizen..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
+          </div>
+          <div className="border border-black">
+            <div className="border-b border-black bg-gray-50 px-3 py-1.5 text-center text-sm font-bold">
+              Lieferant:
             </div>
-          </CardContent>
-        </Card>
+            <div className="p-3 text-xs leading-relaxed">
+              <p>Ralf Hitscher</p>
+              <p>Süderquerweg 484</p>
+              <p>21037 Hamburg</p>
+            </div>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Artikel</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {/* Desktop header */}
-            <div className="hidden sm:grid sm:grid-cols-[1fr_70px_70px_70px_80px_40px] sm:gap-2 sm:px-1 sm:text-sm sm:font-medium sm:text-muted-foreground">
-              <span>Artikel</span>
-              <span className="text-center">35</span>
-              <span className="text-center">65</span>
-              <span className="text-center">85</span>
-              <span className="text-center">&euro;</span>
-              <span />
-            </div>
+        {/* Row 2: Lieferschein Nr (left) + Datum (right) */}
+        <div className="grid grid-cols-[1fr_1fr] gap-4">
+          <div className="flex items-center gap-2 border border-black px-3 py-1.5">
+            <span className="text-sm font-bold whitespace-nowrap">Lieferschein Nr:</span>
+            <Input
+              className="h-7 border-0 border-b border-black rounded-none shadow-none px-1 text-sm focus-visible:ring-0"
+              placeholder="z.B. 2026-001"
+              value={lieferscheinNr}
+              onChange={(e) => setLieferscheinNr(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-2 border border-black px-3 py-1.5">
+            <span className="text-sm font-bold whitespace-nowrap">Hamburg, den</span>
+            <Input
+              type="date"
+              className="h-7 border-0 border-b border-black rounded-none shadow-none px-1 text-sm focus-visible:ring-0"
+              value={deliveryDate}
+              onChange={(e) => setDeliveryDate(e.target.value)}
+            />
+          </div>
+        </div>
 
+        {/* Items table matching PDF layout */}
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            {/* Header row 1: column group labels */}
+            <tr>
+              <th className="border border-black px-2 py-1 text-left text-xs font-bold">
+                Artikel und Topfgröße
+              </th>
+              <th colSpan={6} className="border border-black px-2 py-1 text-center text-xs font-bold">
+                Stück / VPE
+              </th>
+              <th className="border-t border-l border-r border-black border-b-0 px-2 py-1 text-center text-xs font-bold">
+                Netto
+              </th>
+            </tr>
+            {/* Header row 2: Bestellnummer chunks */}
+            <tr>
+              <th className="border border-black px-2 py-1 text-left text-xs font-bold align-middle">
+                Bestellnummer
+              </th>
+              {[0, 1, 2, 3, 4, 5].map((pos) => (
+                <th key={`chunk${pos}`} className="border border-black p-0.5 text-center">
+                  <Input
+                    className="h-8 w-full border-0 shadow-none text-center text-lg font-extrabold px-0 focus-visible:ring-0"
+                    inputMode="numeric"
+                    maxLength={2}
+                    value={bestellChunks[pos]}
+                    onChange={(e) => handleChunkChange(pos, e.target.value)}
+                  />
+                </th>
+              ))}
+              <th className="border-b border-l border-r border-black border-t-0 px-2 py-1 text-center text-xs font-bold">
+                Einzelpreis
+                <br />
+                in €
+              </th>
+            </tr>
+          </thead>
+          <tbody>
             {items.map((item, index) => (
-              <div key={item.article_name}>
-                {/* Mobile layout */}
-                <div className="flex flex-col gap-2 sm:hidden">
+              <tr key={item.article_name} className="group">
+                <td className="border border-black px-2 py-1 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{item.article_name}</span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeItem(index)}>
-                      <Trash2Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>{item.article_name}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeItem(index)}
+                    >
+                      <Trash2Icon className="h-3 w-3 text-muted-foreground" />
                     </Button>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    <div>
-                      <Label className="text-xs text-muted-foreground">35</Label>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        className="h-9"
-                        value={item.quantity_35 || ''}
-                        onChange={(e) => updateItem(index, 'quantity_35', Number.parseInt(e.target.value) || 0)}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">65</Label>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        className="h-9"
-                        value={item.quantity_65 || ''}
-                        onChange={(e) => updateItem(index, 'quantity_65', Number.parseInt(e.target.value) || 0)}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">85</Label>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        className="h-9"
-                        value={item.quantity_85 || ''}
-                        onChange={(e) => updateItem(index, 'quantity_85', Number.parseInt(e.target.value) || 0)}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">&euro;</Label>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        className="h-9"
-                        placeholder="0,00"
-                        value={formatPrice(item.unit_price_cents)}
-                        onChange={(e) => updateItem(index, 'unit_price_cents', parsePrice(e.target.value))}
-                      />
-                    </div>
-                  </div>
-                  {index < items.length - 1 && <Separator className="mt-2" />}
-                </div>
-
-                {/* Desktop layout */}
-                <div className="hidden sm:grid sm:grid-cols-[1fr_70px_70px_70px_80px_40px] sm:items-center sm:gap-2">
-                  <span className="truncate text-sm">{item.article_name}</span>
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    className="h-8 text-center"
-                    value={item.quantity_35 || ''}
-                    onChange={(e) => updateItem(index, 'quantity_35', Number.parseInt(e.target.value) || 0)}
-                  />
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    className="h-8 text-center"
-                    value={item.quantity_65 || ''}
-                    onChange={(e) => updateItem(index, 'quantity_65', Number.parseInt(e.target.value) || 0)}
-                  />
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    className="h-8 text-center"
-                    value={item.quantity_85 || ''}
-                    onChange={(e) => updateItem(index, 'quantity_85', Number.parseInt(e.target.value) || 0)}
-                  />
+                </td>
+                <td className="border border-black px-1 py-1" />
+                <td className="border border-black px-1 py-1" />
+                <td className="border border-black px-1 py-1" />
+                <td className="border border-black px-1 py-1" />
+                <td className="border border-black px-1 py-1" />
+                <td className="border border-black px-1 py-1" />
+                <td className="border border-black px-1 py-0.5">
                   <Input
                     type="text"
                     inputMode="decimal"
-                    className="h-8 text-center"
+                    className="h-7 w-full border-0 shadow-none text-right text-xs px-1 focus-visible:ring-0"
                     placeholder="0,00"
                     value={formatPrice(item.unit_price_cents)}
                     onChange={(e) => updateItem(index, 'unit_price_cents', parsePrice(e.target.value))}
                   />
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(index)}>
-                    <Trash2Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                  </Button>
-                </div>
-              </div>
+                </td>
+              </tr>
             ))}
+            {/* Empty padding rows to match PDF (min 15 rows) */}
+            {Array.from({ length: Math.max(0, 15 - items.length) }, (_, rowIdx) => {
+              const key = `empty-row-${items.length + rowIdx}`
+              return (
+                <tr key={key}>
+                  <td className="border border-black px-2 py-2.5 text-xs">&nbsp;</td>
+                  <td className="border border-black px-1 py-2.5" />
+                  <td className="border border-black px-1 py-2.5" />
+                  <td className="border border-black px-1 py-2.5" />
+                  <td className="border border-black px-1 py-2.5" />
+                  <td className="border border-black px-1 py-2.5" />
+                  <td className="border border-black px-1 py-2.5" />
+                  <td className="border border-black px-1 py-2.5" />
+                </tr>
+              )
+            })}
 
-            <Separator />
+            <tr>
+              <td colSpan={9} className="px-2 pb-2.5 text-xs text-center">
+                <p className="mt-2 text-[10px]">Pflanzenpass: DE-HH1-110071</p>
+              </td>
+            </tr>
 
-            <div className="flex gap-2">
-              <Input
-                placeholder="Neuen Artikel hinzufügen..."
-                value={customArticle}
-                onChange={(e) => setCustomArticle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addCustomArticle()}
-              />
-              <Button variant="outline" size="icon" onClick={addCustomArticle}>
-                <PlusIcon className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          </tbody>
+        </table>
+
+        {/* Add custom article */}
+        <div className="flex gap-2">
+          <Input
+            placeholder="Neuen Artikel hinzufügen..."
+            value={customArticle}
+            onChange={(e) => setCustomArticle(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addCustomArticle()}
+          />
+          <Button variant="outline" size="icon" onClick={addCustomArticle}>
+            <PlusIcon className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Notes */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium whitespace-nowrap">Notizen:</span>
+          <Input
+            placeholder="Optionale Notizen..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
 
         <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4 sm:static sm:border-0 sm:bg-transparent sm:p-0">
           <Button className="w-full" size="lg" onClick={handleSubmit} disabled={mutation.isPending}>

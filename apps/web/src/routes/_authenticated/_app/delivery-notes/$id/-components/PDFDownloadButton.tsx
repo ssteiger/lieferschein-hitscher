@@ -220,8 +220,8 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                 [
                   {
                     columns: [
-                      { text: 'Hamburg, den', fontSize: 10, width: 'auto' },
-                      { text: formatDate(note.delivery_date), fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+                      { text: 'Hamburg, den', bold: true, fontSize: 10, width: 'auto' },
+                      { text: formatDate(note.delivery_date), fontSize: 10, width: '*', margin: [4, 0, 0, 0] as [number, number, number, number] },
                     ],
                     margin: [4, 4, 4, 4] as [number, number, number, number],
                   },
@@ -280,11 +280,11 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
             ],
             // Header row 2: Bestellnummer split into 6 two-digit chunks
             [
-              { text: 'Bestellnummer', bold: true, fontSize: 9, margin: [4, 4, 4, 4] as [number, number, number, number] },
+              { text: 'Bestellnummer', bold: true, fontSize: 9, margin: [4, 8, 4, 4] as [number, number, number, number] },
               ...splitBestellnummer(note.bestellnummer).map((chunk) => ({
                 text: chunk,
                 bold: true,
-                fontSize: 16,
+                fontSize: 20,
                 alignment: 'center' as const,
                 margin: [2, 2, 2, 2] as [number, number, number, number],
               })),

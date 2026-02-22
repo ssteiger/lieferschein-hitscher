@@ -52,6 +52,13 @@ bun run dev:web
 # open web app at http://127.0.0.1:3000
 ```
 
+## Reset db
+
+```bash
+cd packages/supabase
+supabase db reset
+```
+
 ## Generate types
 
 ```bash
