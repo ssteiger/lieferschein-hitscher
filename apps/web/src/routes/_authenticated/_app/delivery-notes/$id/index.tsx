@@ -16,9 +16,7 @@ import { PDFDownloadButton } from './-components/PDFDownloadButton'
 interface DeliveryNoteItem {
   id?: string
   article_name: string
-  quantity_35: number
-  quantity_65: number
-  quantity_85: number
+  quantities: number[]
   unit_price_cents: number
 }
 
@@ -71,7 +69,7 @@ const updateDeliveryNote = createServerFn({ method: 'POST' })
       .where(eq(schema.delivery_note_items.delivery_note_id, data.id))
 
     const itemsWithData = data.items.filter(
-      (item) => item.quantity_35 > 0 || item.quantity_65 > 0 || item.quantity_85 > 0 || item.unit_price_cents > 0,
+      (item) => item.quantities.some((q) => q > 0) || item.unit_price_cents > 0,
     )
 
     if (itemsWithData.length > 0) {
@@ -79,9 +77,7 @@ const updateDeliveryNote = createServerFn({ method: 'POST' })
         itemsWithData.map((item, index) => ({
           delivery_note_id: note.id,
           article_name: item.article_name,
-          quantity_35: item.quantity_35,
-          quantity_65: item.quantity_65,
-          quantity_85: item.quantity_85,
+          quantities: item.quantities,
           unit_price_cents: item.unit_price_cents,
           sort_order: index,
         })),
@@ -136,7 +132,7 @@ function ReadOnlyView({
   isDeleting: boolean
 }) {
   const totalItems = note.items.reduce(
-    (acc, item) => acc + item.quantity_35 + item.quantity_65 + item.quantity_85,
+    (acc, item) => acc + item.quantities.reduce((sum, q) => sum + q, 0),
     0,
   )
 
@@ -179,11 +175,11 @@ function ReadOnlyView({
         <CardContent>
           {note.items.length > 0 ? (
             <div className="space-y-1">
-              <div className="hidden sm:grid sm:grid-cols-[1fr_70px_70px_70px_90px] sm:gap-2 sm:px-1 sm:pb-2 sm:text-sm sm:font-medium sm:text-muted-foreground">
+              <div className="hidden sm:grid sm:grid-cols-[1fr_repeat(6,50px)_90px] sm:gap-2 sm:px-1 sm:pb-2 sm:text-sm sm:font-medium sm:text-muted-foreground">
                 <span>Artikel</span>
-                <span className="text-center">35</span>
-                <span className="text-center">65</span>
-                <span className="text-center">85</span>
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <span key={i} className="text-center">#{i + 1}</span>
+                ))}
                 <span className="text-right">Preis</span>
               </div>
               <Separator className="hidden sm:block" />
@@ -193,18 +189,16 @@ function ReadOnlyView({
                   <div className="flex flex-col gap-1 py-2 sm:hidden">
                     <p className="text-sm font-medium">{item.article_name}</p>
                     <div className="text-muted-foreground flex gap-3 text-xs">
-                      {item.quantity_35 > 0 && <span>35: {item.quantity_35}</span>}
-                      {item.quantity_65 > 0 && <span>65: {item.quantity_65}</span>}
-                      {item.quantity_85 > 0 && <span>85: {item.quantity_85}</span>}
+                      {[0, 1, 2, 3, 4, 5].map((pos) => item.quantities[pos] > 0 && <span key={`q${pos}`}>{item.quantities[pos]}</span>)}
                       {item.unit_price_cents > 0 && <span>{formatPriceDisplay(item.unit_price_cents)}</span>}
                     </div>
                   </div>
                   {/* Desktop */}
-                  <div className="hidden sm:grid sm:grid-cols-[1fr_70px_70px_70px_90px] sm:items-center sm:gap-2 sm:py-1.5">
+                  <div className="hidden sm:grid sm:grid-cols-[1fr_repeat(6,50px)_90px] sm:items-center sm:gap-2 sm:py-1.5">
                     <span className="truncate text-sm">{item.article_name}</span>
-                    <span className="text-center text-sm">{item.quantity_35 || '—'}</span>
-                    <span className="text-center text-sm">{item.quantity_65 || '—'}</span>
-                    <span className="text-center text-sm">{item.quantity_85 || '—'}</span>
+                    {[0, 1, 2, 3, 4, 5].map((pos) => (
+                      <span key={`q${pos}`} className="text-center text-sm">{item.quantities[pos] || '—'}</span>
+                    ))}
                     <span className="text-right text-sm">{formatPriceDisplay(item.unit_price_cents)}</span>
                   </div>
                 </div>
@@ -261,6 +255,16 @@ function EditView({
     })
   }
 
+  const updateItemQuantity = (index: number, chunkIndex: number, value: number) => {
+    setItems((prev) => {
+      const updated = [...prev]
+      const quantities = [...updated[index].quantities]
+      quantities[chunkIndex] = value
+      updated[index] = { ...updated[index], quantities }
+      return updated
+    })
+  }
+
   const removeItem = (index: number) => {
     setItems((prev) => prev.filter((_, i) => i !== index))
   }
@@ -269,7 +273,7 @@ function EditView({
     if (!customArticle.trim()) return
     setItems((prev) => [
       ...prev,
-      { article_name: customArticle.trim(), quantity_35: 0, quantity_65: 0, quantity_85: 0, unit_price_cents: 0 },
+      { article_name: customArticle.trim(), quantities: [0, 0, 0, 0, 0, 0], unit_price_cents: 0 },
     ])
     setCustomArticle('')
   }
@@ -319,11 +323,11 @@ function EditView({
           <CardTitle>Artikel</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="hidden sm:grid sm:grid-cols-[1fr_70px_70px_70px_80px_40px] sm:gap-2 sm:px-1 sm:text-sm sm:font-medium sm:text-muted-foreground">
+          <div className="hidden sm:grid sm:grid-cols-[1fr_repeat(6,50px)_80px_40px] sm:gap-2 sm:px-1 sm:text-sm sm:font-medium sm:text-muted-foreground">
             <span>Artikel</span>
-            <span className="text-center">35</span>
-            <span className="text-center">65</span>
-            <span className="text-center">85</span>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <span key={i} className="text-center">#{i + 1}</span>
+            ))}
             <span className="text-center">&euro;</span>
             <span />
           </div>
@@ -339,18 +343,12 @@ function EditView({
                   </Button>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">35</Label>
-                    <Input type="number" inputMode="numeric" min={0} className="h-9" value={item.quantity_35 || ''} onChange={(e) => updateItem(index, 'quantity_35', Number.parseInt(e.target.value) || 0)} />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">65</Label>
-                    <Input type="number" inputMode="numeric" min={0} className="h-9" value={item.quantity_65 || ''} onChange={(e) => updateItem(index, 'quantity_65', Number.parseInt(e.target.value) || 0)} />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">85</Label>
-                    <Input type="number" inputMode="numeric" min={0} className="h-9" value={item.quantity_85 || ''} onChange={(e) => updateItem(index, 'quantity_85', Number.parseInt(e.target.value) || 0)} />
-                  </div>
+                  {[0, 1, 2, 3, 4, 5].map((pos) => (
+                    <div key={`chunk${pos}`}>
+                      <Label className="text-xs text-muted-foreground">#{pos + 1}</Label>
+                      <Input type="number" inputMode="numeric" min={0} className="h-9" value={item.quantities[pos] || ''} onChange={(e) => updateItemQuantity(index, pos, Number.parseInt(e.target.value) || 0)} />
+                    </div>
+                  ))}
                   <div>
                     <Label className="text-xs text-muted-foreground">&euro;</Label>
                     <Input type="text" inputMode="decimal" className="h-9" placeholder="0,00" value={formatPrice(item.unit_price_cents)} onChange={(e) => updateItem(index, 'unit_price_cents', parsePrice(e.target.value))} />
@@ -360,11 +358,11 @@ function EditView({
               </div>
 
               {/* Desktop layout */}
-              <div className="hidden sm:grid sm:grid-cols-[1fr_70px_70px_70px_80px_40px] sm:items-center sm:gap-2">
+              <div className="hidden sm:grid sm:grid-cols-[1fr_repeat(6,50px)_80px_40px] sm:items-center sm:gap-2">
                 <span className="truncate text-sm">{item.article_name}</span>
-                <Input type="number" inputMode="numeric" min={0} className="h-8 text-center" value={item.quantity_35 || ''} onChange={(e) => updateItem(index, 'quantity_35', Number.parseInt(e.target.value) || 0)} />
-                <Input type="number" inputMode="numeric" min={0} className="h-8 text-center" value={item.quantity_65 || ''} onChange={(e) => updateItem(index, 'quantity_65', Number.parseInt(e.target.value) || 0)} />
-                <Input type="number" inputMode="numeric" min={0} className="h-8 text-center" value={item.quantity_85 || ''} onChange={(e) => updateItem(index, 'quantity_85', Number.parseInt(e.target.value) || 0)} />
+                {[0, 1, 2, 3, 4, 5].map((pos) => (
+                  <Input key={`chunk${pos}`} type="number" inputMode="numeric" min={0} className="h-8 text-center" value={item.quantities[pos] || ''} onChange={(e) => updateItemQuantity(index, pos, Number.parseInt(e.target.value) || 0)} />
+                ))}
                 <Input type="text" inputMode="decimal" className="h-8 text-center" placeholder="0,00" value={formatPrice(item.unit_price_cents)} onChange={(e) => updateItem(index, 'unit_price_cents', parsePrice(e.target.value))} />
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(index)}>
                   <Trash2Icon className="h-3.5 w-3.5 text-muted-foreground" />

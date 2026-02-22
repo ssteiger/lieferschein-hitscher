@@ -4,9 +4,7 @@ import { DownloadIcon } from 'lucide-react'
 interface DeliveryNoteItem {
   id?: string
   article_name: string
-  quantity_35: number
-  quantity_65: number
-  quantity_85: number
+  quantities: number[]
   unit_price_cents: number
 }
 
@@ -55,12 +53,12 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
 
   const itemRows = note.items.map((item) => [
     { text: item.article_name, fontSize: 9, margin: [4, 6, 4, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    ...item.quantities.map((q) => ({
+      text: q > 0 ? String(q) : '',
+      alignment: 'center' as const,
+      fontSize: 9,
+      margin: [2, 6, 2, 6] as [number, number, number, number],
+    })),
     {
       text: item.unit_price_cents > 0
         ? (item.unit_price_cents / 100).toFixed(2).replace('.', ',')

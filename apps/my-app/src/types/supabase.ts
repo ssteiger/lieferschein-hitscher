@@ -60,9 +60,7 @@ export type Database = {
           article_name: string
           delivery_note_id: string
           id: string
-          quantity_35: number
-          quantity_65: number
-          quantity_85: number
+          quantities: Json
           sort_order: number
           unit_price_cents: number
         }
@@ -70,9 +68,7 @@ export type Database = {
           article_name: string
           delivery_note_id: string
           id?: string
-          quantity_35?: number
-          quantity_65?: number
-          quantity_85?: number
+          quantities?: Json
           sort_order?: number
           unit_price_cents?: number
         }
@@ -80,9 +76,7 @@ export type Database = {
           article_name?: string
           delivery_note_id?: string
           id?: string
-          quantity_35?: number
-          quantity_65?: number
-          quantity_85?: number
+          quantities?: Json
           sort_order?: number
           unit_price_cents?: number
         }
