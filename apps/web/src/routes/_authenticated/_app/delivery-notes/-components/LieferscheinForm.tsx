@@ -1,7 +1,10 @@
-import { forwardRef } from 'react'
+import { useState } from 'react'
 import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
 import { Trash2Icon } from 'lucide-react'
+import { PriceDrawer } from './DrawerPrice'
+import { LieferscheinNrDrawer } from './DrawerLieferscheinNr'
+import { DateDrawer } from './DrawerDate'
 
 interface DeliveryNoteItem {
   article_name: string
@@ -36,26 +39,11 @@ function formatPrice(cents: number) {
   return (cents / 100).toFixed(2)
 }
 
-function parsePrice(value: string): number {
-  const cleaned = value.replace(',', '.')
-  const parsed = Number.parseFloat(cleaned)
-  if (Number.isNaN(parsed)) return 0
-  return Math.round(parsed * 100)
-}
-
-export const LieferscheinForm = forwardRef<HTMLDivElement, LieferscheinFormProps>(function LieferscheinForm({
-  lieferscheinNr,
-  onLieferscheinNrChange,
-  bestellnummer,
-  onBestellnummerChange,
-  deliveryDate,
-  onDeliveryDateChange,
-  items,
-  onRemoveItem,
-  onUpdateItemQuantity,
-  onUpdateItemPrice,
-}, ref) {
+export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr, onLieferscheinNrChange, bestellnummer, onBestellnummerChange, deliveryDate, onDeliveryDateChange, items, onRemoveItem, onUpdateItemQuantity, onUpdateItemPrice }: LieferscheinFormProps & { ref?: React.RefObject<HTMLDivElement | null> }) {
   const bestellChunks = splitBestellnummer(bestellnummer)
+  const [priceEditIndex, setPriceEditIndex] = useState<number | null>(null)
+  const [lieferscheinNrDrawerOpen, setLieferscheinNrDrawerOpen] = useState(false)
+  const [dateDrawerOpen, setDateDrawerOpen] = useState(false)
 
   const handleChunkChange = (index: number, value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 2)
@@ -95,24 +83,28 @@ export const LieferscheinForm = forwardRef<HTMLDivElement, LieferscheinFormProps
 
       {/* Row 2: Lieferschein Nr (left) + Datum (right) */}
       <div className="grid grid-cols-[1fr_1fr] gap-4">
-        <div className="flex items-center gap-2 border border-black px-3 py-1.5">
+        <button
+          type="button"
+          className="flex items-center gap-2 border border-black px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors"
+          onClick={() => setLieferscheinNrDrawerOpen(true)}
+        >
           <span className="text-sm font-bold whitespace-nowrap">Lieferschein Nr:</span>
-          <Input
-            className="h-7 border-0 border-b border-black rounded-none shadow-none px-1 text-sm focus-visible:ring-0"
-            placeholder="z.B. 2026-001"
-            value={lieferscheinNr}
-            onChange={(e) => onLieferscheinNrChange(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center gap-2 border border-black px-3 py-1.5">
+          <span className="text-sm border-b border-black px-1 flex-1">
+            {lieferscheinNr || <span className="text-muted-foreground">z.B. 2026-001</span>}
+          </span>
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-2 border border-black px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors"
+          onClick={() => setDateDrawerOpen(true)}
+        >
           <span className="text-sm font-bold whitespace-nowrap">Hamburg, den</span>
-          <Input
-            type="date"
-            className="h-7 border-0 border-b border-black rounded-none shadow-none px-1 text-sm focus-visible:ring-0"
-            value={deliveryDate}
-            onChange={(e) => onDeliveryDateChange(e.target.value)}
-          />
-        </div>
+          <span className="text-sm border-b border-black px-1 flex-1">
+            {deliveryDate
+              ? new Date(deliveryDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+              : <span className="text-muted-foreground">Datum wählen</span>}
+          </span>
+        </button>
       </div>
 
       {/* Items table matching PDF layout */}
@@ -151,6 +143,7 @@ export const LieferscheinForm = forwardRef<HTMLDivElement, LieferscheinFormProps
             </th>
           </tr>
         </thead>
+        
         <tbody>
           {items.map((item, index) => (
             <tr key={item.article_name} className="group">
@@ -167,26 +160,29 @@ export const LieferscheinForm = forwardRef<HTMLDivElement, LieferscheinFormProps
                   </Button>
                 </div>
               </td>
-              {[0, 1, 2, 3, 4, 5].map((chunkIdx) => (
-                <td key={`q${chunkIdx}`} className="border border-black px-0.5 py-0.5">
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    className="h-7 w-full border-0 shadow-none text-center text-xs px-0 focus-visible:ring-0"
-                    value={item.quantities[chunkIdx] || ''}
-                    onChange={(e) => onUpdateItemQuantity(index, chunkIdx, Number.parseInt(e.target.value) || 0)}
-                  />
-                </td>
-              ))}
+              {[0, 1, 2, 3, 4, 5].map((chunkIdx) => {
+                const chunkEmpty = !bestellChunks[chunkIdx]
+                return (
+                  <td key={`q${chunkIdx}`} className={`border border-black px-0.5 py-0.5 ${chunkEmpty ? 'bg-muted' : ''}`}>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      disabled={chunkEmpty}
+                      className="h-7 w-full border-0 shadow-none text-center text-xs px-0 focus-visible:ring-0 disabled:opacity-40"
+                      value={item.quantities[chunkIdx] || ''}
+                      onChange={(e) => onUpdateItemQuantity(index, chunkIdx, Number.parseInt(e.target.value) || 0)}
+                    />
+                  </td>
+                )
+              })}
               <td className="border border-black px-1 py-0.5">
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  className="h-7 w-full border-0 shadow-none text-right text-xs px-1 focus-visible:ring-0"
-                  placeholder="0,00"
-                  value={formatPrice(item.unit_price_cents)}
-                  onChange={(e) => onUpdateItemPrice(index, parsePrice(e.target.value))}
-                />
+                <button
+                  type="button"
+                  className="h-7 w-full text-right text-xs px-1 cursor-pointer hover:bg-muted/50 rounded transition-colors"
+                  onClick={() => setPriceEditIndex(index)}
+                >
+                  {item.unit_price_cents > 0 ? formatPrice(item.unit_price_cents) : <span className="text-muted-foreground">0,00</span>}
+                </button>
               </td>
             </tr>
           ))}
@@ -212,6 +208,37 @@ export const LieferscheinForm = forwardRef<HTMLDivElement, LieferscheinFormProps
           </tr>
         </tbody>
       </table>
+
+      <DateDrawer
+        open={dateDrawerOpen}
+        initialValue={deliveryDate}
+        onSubmit={(value) => {
+          onDeliveryDateChange(value)
+          setDateDrawerOpen(false)
+        }}
+        onClose={() => setDateDrawerOpen(false)}
+      />
+
+      <LieferscheinNrDrawer
+        open={lieferscheinNrDrawerOpen}
+        initialValue={lieferscheinNr}
+        onSubmit={(value) => {
+          onLieferscheinNrChange(value)
+          setLieferscheinNrDrawerOpen(false)
+        }}
+        onClose={() => setLieferscheinNrDrawerOpen(false)}
+      />
+
+      <PriceDrawer
+        open={priceEditIndex !== null}
+        articleName={priceEditIndex !== null ? items[priceEditIndex]?.article_name ?? 'Einzelpreis' : 'Einzelpreis'}
+        initialCents={priceEditIndex !== null ? items[priceEditIndex]?.unit_price_cents ?? 0 : 0}
+        onSubmit={(cents) => {
+          if (priceEditIndex !== null) onUpdateItemPrice(priceEditIndex, cents)
+          setPriceEditIndex(null)
+        }}
+        onClose={() => setPriceEditIndex(null)}
+      />
     </div>
   )
-})
+}
