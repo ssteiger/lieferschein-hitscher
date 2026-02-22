@@ -315,7 +315,7 @@ export function PDFDownloadButton({ note }: PDFDownloadButtonProps) {
   return (
     <Button variant="outline" size="lg" onClick={() => downloadPdf(note)}>
       <DownloadIcon className="mr-2 h-4 w-4" />
-      PDF
+      PDF herunterladen
     </Button>
   )
 }

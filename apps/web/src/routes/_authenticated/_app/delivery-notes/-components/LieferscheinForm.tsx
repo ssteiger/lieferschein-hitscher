@@ -220,7 +220,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
         </tbody>
       </table>
 
-          {!disabled && onSetItems && (
+      {!disabled && onSetItems && (
         <Button
           type="button"
           variant="outline"

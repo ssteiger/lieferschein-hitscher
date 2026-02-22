@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { postgres_db, schema, eq, asc } from '@lieferschein-hitscher/db-drizzle'
 import { Button } from '~/lib/components/ui/button'
 import { Skeleton } from '~/lib/components/ui/skeleton'
-import { toast } from 'sonner'
 import { useRef } from 'react'
-import { ArrowLeftIcon, Trash2Icon, PencilIcon, PrinterIcon } from 'lucide-react'
+import { ArrowLeftIcon, PencilIcon, PrinterIcon } from 'lucide-react'
 import { PDFDownloadButton } from './-components/PDFDownloadButton'
+import { DeleteButton } from './-components/DeleteButton'
 import { LieferscheinForm } from '../-components/LieferscheinForm'
 import { useReactToPrint } from 'react-to-print'
 
@@ -31,18 +31,9 @@ const getDeliveryNote = createServerFn({ method: 'GET' })
     return { ...note, items }
   })
 
-const deleteDeliveryNote = createServerFn({ method: 'POST' })
-  .validator((input: { id: string }) => input)
-  .handler(async ({ data }) => {
-    await postgres_db
-      .delete(schema.delivery_notes)
-      .where(eq(schema.delivery_notes.id, data.id))
-  })
-
 const DeliveryNoteDetailPage = () => {
   const { id } = Route.useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const formRef = useRef<HTMLDivElement>(null)
 
   const { data: note, isLoading } = useQuery({
@@ -53,18 +44,6 @@ const DeliveryNoteDetailPage = () => {
   const handlePrint = useReactToPrint({
     contentRef: formRef,
     documentTitle: note?.lieferschein_nr ? `Lieferschein-${note.lieferschein_nr}` : 'Lieferschein',
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteDeliveryNote({ data: { id } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['delivery-notes'] })
-      toast.success('Lieferschein gelöscht')
-      navigate({ to: '/delivery-notes/overview' })
-    },
-    onError: (error) => {
-      toast.error(`Fehler beim Löschen: ${error.message}`)
-    },
   })
 
   if (isLoading) {
@@ -124,20 +103,17 @@ const DeliveryNoteDetailPage = () => {
           </div>
         )}
 
-        <div className="flex gap-3">
-          <Button className="flex-1" size="lg" onClick={() => navigate({ to: '/delivery-notes/$id/edit', params: { id } })}>
+        <div className="flex flex-col gap-3">
+          <Button className="w-full" size="lg" onClick={() => navigate({ to: '/delivery-notes/$id/edit', params: { id } })}>
             <PencilIcon className="mr-2 h-4 w-4" />
             Bearbeiten
           </Button>
-          <Button size="lg" variant="outline" onClick={() => handlePrint()}>
+          <Button className="w-full" size="lg" variant="outline" onClick={() => handlePrint()}>
             <PrinterIcon className="mr-2 h-4 w-4" />
             Drucken
           </Button>
           <PDFDownloadButton note={note} />
-          <Button variant="destructive" size="lg" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
-            <Trash2Icon className="mr-2 h-4 w-4" />
-            {deleteMutation.isPending ? 'Löschen...' : 'Löschen'}
-          </Button>
+          <DeleteButton id={id} lieferscheinNr={note.lieferschein_nr} />
         </div>
       </div>
     </div>
