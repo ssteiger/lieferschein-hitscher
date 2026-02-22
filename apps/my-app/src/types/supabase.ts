@@ -34,592 +34,101 @@ export type Database = {
   }
   public: {
     Tables: {
-      bot: {
+      app_settings: {
         Row: {
-          background_story: string | null
-          bot_character_description: string | null
-          bot_id: number
-          bot_name: string
-          created_at: string
-          last_active_at: string
-          money_balance_in_cents: number
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
         }
         Insert: {
-          background_story?: string | null
-          bot_character_description?: string | null
-          bot_id?: number
-          bot_name: string
-          created_at?: string
-          last_active_at?: string
-          money_balance_in_cents?: number
+          id?: string
+          setting_key: string
+          setting_value?: Json
+          updated_at?: string
         }
         Update: {
-          background_story?: string | null
-          bot_character_description?: string | null
-          bot_id?: number
-          bot_name?: string
-          created_at?: string
-          last_active_at?: string
-          money_balance_in_cents?: number
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
         }
         Relationships: []
       }
-      company: {
+      delivery_note_items: {
         Row: {
-          company_id: string
-          company_name: string
-          created_at: string
-          creator_bot_id: number
-          description: string | null
-          exchange_id: string
-          ticker_symbol: string
-          total_shares: number
+          article_name: string
+          delivery_note_id: string
+          id: string
+          quantity_35: number
+          quantity_65: number
+          quantity_85: number
+          sort_order: number
+          unit_price_cents: number
         }
         Insert: {
-          company_id: string
-          company_name: string
-          created_at?: string
-          creator_bot_id: number
-          description?: string | null
-          exchange_id: string
-          ticker_symbol: string
-          total_shares: number
+          article_name: string
+          delivery_note_id: string
+          id?: string
+          quantity_35?: number
+          quantity_65?: number
+          quantity_85?: number
+          sort_order?: number
+          unit_price_cents?: number
         }
         Update: {
-          company_id?: string
-          company_name?: string
-          created_at?: string
-          creator_bot_id?: number
-          description?: string | null
-          exchange_id?: string
-          ticker_symbol?: string
-          total_shares?: number
+          article_name?: string
+          delivery_note_id?: string
+          id?: string
+          quantity_35?: number
+          quantity_65?: number
+          quantity_85?: number
+          sort_order?: number
+          unit_price_cents?: number
         }
         Relationships: [
           {
-            foreignKeyName: "company_creator_bot_id_fkey"
-            columns: ["creator_bot_id"]
+            foreignKeyName: "delivery_note_items_delivery_note_id_fkey"
+            columns: ["delivery_note_id"]
             isOneToOne: false
-            referencedRelation: "bot"
-            referencedColumns: ["bot_id"]
-          },
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["exchange_code"]
-          },
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "exchange"
-            referencedColumns: ["exchange_id"]
-          },
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["exchange_code"]
+            referencedRelation: "delivery_notes"
+            referencedColumns: ["id"]
           },
         ]
       }
-      exchange: {
+      delivery_notes: {
         Row: {
           created_at: string
-          exchange_code: string
-          exchange_id: string
-          exchange_name: string
-          is_active: boolean
-          trading_fee_percent: number
+          delivery_date: string
+          id: string
+          lieferschein_nr: string | null
+          notes: string | null
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          exchange_code: string
-          exchange_id: string
-          exchange_name: string
-          is_active?: boolean
-          trading_fee_percent?: number
+          delivery_date?: string
+          id?: string
+          lieferschein_nr?: string | null
+          notes?: string | null
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          exchange_code?: string
-          exchange_id?: string
-          exchange_name?: string
-          is_active?: boolean
-          trading_fee_percent?: number
+          delivery_date?: string
+          id?: string
+          lieferschein_nr?: string | null
+          notes?: string | null
+          updated_at?: string
         }
         Relationships: []
-      }
-      logs: {
-        Row: {
-          created_at: string | null
-          id: number
-          message: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: number
-          message: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: number
-          message?: string
-        }
-        Relationships: []
-      }
-      order: {
-        Row: {
-          bot_id: number
-          company_id: string
-          created_at: string
-          expires_at: string | null
-          is_buy: boolean
-          last_updated_at: string
-          order_id: number
-          order_type: string
-          price_in_cents: number
-          quantity: number
-          quantity_filled: number
-          quantity_open: number | null
-          status: string
-        }
-        Insert: {
-          bot_id: number
-          company_id: string
-          created_at?: string
-          expires_at?: string | null
-          is_buy: boolean
-          last_updated_at?: string
-          order_id?: number
-          order_type: string
-          price_in_cents: number
-          quantity: number
-          quantity_filled?: number
-          quantity_open?: number | null
-          status?: string
-        }
-        Update: {
-          bot_id?: number
-          company_id?: string
-          created_at?: string
-          expires_at?: string | null
-          is_buy?: boolean
-          last_updated_at?: string
-          order_id?: number
-          order_type?: string
-          price_in_cents?: number
-          quantity?: number
-          quantity_filled?: number
-          quantity_open?: number | null
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_bot_id_fkey"
-            columns: ["bot_id"]
-            isOneToOne: false
-            referencedRelation: "bot"
-            referencedColumns: ["bot_id"]
-          },
-          {
-            foreignKeyName: "order_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "order_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "order_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "order_order_type_fkey"
-            columns: ["order_type"]
-            isOneToOne: false
-            referencedRelation: "order_type"
-            referencedColumns: ["order_type"]
-          },
-          {
-            foreignKeyName: "order_status_fkey"
-            columns: ["status"]
-            isOneToOne: false
-            referencedRelation: "order_status"
-            referencedColumns: ["order_status"]
-          },
-        ]
-      }
-      order_status: {
-        Row: {
-          order_status: string
-        }
-        Insert: {
-          order_status: string
-        }
-        Update: {
-          order_status?: string
-        }
-        Relationships: []
-      }
-      order_type: {
-        Row: {
-          order_type: string
-        }
-        Insert: {
-          order_type: string
-        }
-        Update: {
-          order_type?: string
-        }
-        Relationships: []
-      }
-      price_history: {
-        Row: {
-          close_price_in_cents: number
-          company_id: string
-          exchange_id: string
-          high_price_in_cents: number
-          history_id: number
-          low_price_in_cents: number
-          open_price_in_cents: number
-          period_length: string
-          timestamp: string
-          volume: number
-        }
-        Insert: {
-          close_price_in_cents: number
-          company_id: string
-          exchange_id: string
-          high_price_in_cents: number
-          history_id?: number
-          low_price_in_cents: number
-          open_price_in_cents: number
-          period_length: string
-          timestamp: string
-          volume: number
-        }
-        Update: {
-          close_price_in_cents?: number
-          company_id?: string
-          exchange_id?: string
-          high_price_in_cents?: number
-          history_id?: number
-          low_price_in_cents?: number
-          open_price_in_cents?: number
-          period_length?: string
-          timestamp?: string
-          volume?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "price_history_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "price_history_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "price_history_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "price_history_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["exchange_code"]
-          },
-          {
-            foreignKeyName: "price_history_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "exchange"
-            referencedColumns: ["exchange_id"]
-          },
-          {
-            foreignKeyName: "price_history_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["exchange_code"]
-          },
-        ]
-      }
-      shareholding: {
-        Row: {
-          average_purchase_price_in_cents: number | null
-          bot_id: number
-          company_id: string
-          last_updated_at: string
-          shareholding_id: number
-          shares: number
-        }
-        Insert: {
-          average_purchase_price_in_cents?: number | null
-          bot_id: number
-          company_id: string
-          last_updated_at?: string
-          shareholding_id?: number
-          shares?: number
-        }
-        Update: {
-          average_purchase_price_in_cents?: number | null
-          bot_id?: number
-          company_id?: string
-          last_updated_at?: string
-          shareholding_id?: number
-          shares?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shareholding_bot_id_fkey"
-            columns: ["bot_id"]
-            isOneToOne: false
-            referencedRelation: "bot"
-            referencedColumns: ["bot_id"]
-          },
-          {
-            foreignKeyName: "shareholding_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "shareholding_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "shareholding_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["company_id"]
-          },
-        ]
-      }
-      trade: {
-        Row: {
-          buy_order_id: number
-          buyer_bot_id: number
-          company_id: string
-          exchange_id: string
-          executed_at: string
-          price_in_cents: number
-          quantity: number
-          sell_order_id: number
-          seller_bot_id: number
-          trade_fee_in_cents: number
-          trade_id: number
-        }
-        Insert: {
-          buy_order_id: number
-          buyer_bot_id: number
-          company_id: string
-          exchange_id: string
-          executed_at?: string
-          price_in_cents: number
-          quantity: number
-          sell_order_id: number
-          seller_bot_id: number
-          trade_fee_in_cents: number
-          trade_id?: number
-        }
-        Update: {
-          buy_order_id?: number
-          buyer_bot_id?: number
-          company_id?: string
-          exchange_id?: string
-          executed_at?: string
-          price_in_cents?: number
-          quantity?: number
-          sell_order_id?: number
-          seller_bot_id?: number
-          trade_fee_in_cents?: number
-          trade_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trade_buy_order_id_fkey"
-            columns: ["buy_order_id"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["order_id"]
-          },
-          {
-            foreignKeyName: "trade_buyer_bot_id_fkey"
-            columns: ["buyer_bot_id"]
-            isOneToOne: false
-            referencedRelation: "bot"
-            referencedColumns: ["bot_id"]
-          },
-          {
-            foreignKeyName: "trade_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "trade_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "trade_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "trade_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["exchange_code"]
-          },
-          {
-            foreignKeyName: "trade_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "exchange"
-            referencedColumns: ["exchange_id"]
-          },
-          {
-            foreignKeyName: "trade_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["exchange_code"]
-          },
-          {
-            foreignKeyName: "trade_sell_order_id_fkey"
-            columns: ["sell_order_id"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["order_id"]
-          },
-          {
-            foreignKeyName: "trade_seller_bot_id_fkey"
-            columns: ["seller_bot_id"]
-            isOneToOne: false
-            referencedRelation: "bot"
-            referencedColumns: ["bot_id"]
-          },
-        ]
       }
     }
     Views: {
-      current_market_price: {
-        Row: {
-          ask_price: number | null
-          bid_price: number | null
-          company_id: string | null
-          exchange_code: string | null
-          exchange_id: string | null
-          last_trade_time: string | null
-          spread: number | null
-          ticker_symbol: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["exchange_code"]
-          },
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "exchange"
-            referencedColumns: ["exchange_id"]
-          },
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["exchange_code"]
-          },
-        ]
-      }
-      order_book: {
-        Row: {
-          company_id: string | null
-          exchange_code: string | null
-          exchange_id: string | null
-          is_buy: boolean | null
-          oldest_order_time: string | null
-          price_in_cents: number | null
-          ticker_symbol: string | null
-          total_quantity: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "current_market_price"
-            referencedColumns: ["exchange_code"]
-          },
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "exchange"
-            referencedColumns: ["exchange_id"]
-          },
-          {
-            foreignKeyName: "company_exchange_id_fkey"
-            columns: ["exchange_id"]
-            isOneToOne: false
-            referencedRelation: "order_book"
-            referencedColumns: ["exchange_code"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
-      accept_order: {
-        Args: {
-          accepting_bot_id: number
-          target_order_id: number
-          trade_quantity: number
-          trade_fee_in_cents: number
-        }
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

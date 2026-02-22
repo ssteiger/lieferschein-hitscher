@@ -34,252 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      user: {
-        Row: {
-          id: string
-          created_at: string
-          updated_at: string
-          email: string
-          name: string
-          email_verified: boolean
-          image: string | null
-          locale: string
-          role: string | null
-          banned: boolean | null
-          ban_reason: string | null
-          ban_expires: string | null
-          last_seen_at: string | null
-        }
-        Insert: {
-          id?: string
-          created_at?: string
-          updated_at?: string
-          email: string
-          name: string
-          email_verified?: boolean
-          image?: string | null
-          locale?: string
-          role?: string | null
-          banned?: boolean | null
-          ban_reason?: string | null
-          ban_expires?: string | null
-          last_seen_at?: string | null
-        }
-        Update: {
-          id?: string
-          created_at?: string
-          updated_at?: string
-          email?: string
-          name?: string
-          email_verified?: boolean
-          image?: string | null
-          locale?: string
-          role?: string | null
-          banned?: boolean | null
-          ban_reason?: string | null
-          ban_expires?: string | null
-          last_seen_at?: string | null
-        }
-        Relationships: []
-      }
-      account: {
-        Row: {
-          id: string
-          account_id: string
-          provider_id: string
-          user_id: string
-          access_token: string | null
-          refresh_token: string | null
-          id_token: string | null
-          access_token_expires_at: string | null
-          refresh_token_expires_at: string | null
-          scope: string | null
-          password: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          account_id: string
-          provider_id: string
-          user_id: string
-          access_token?: string | null
-          refresh_token?: string | null
-          id_token?: string | null
-          access_token_expires_at?: string | null
-          refresh_token_expires_at?: string | null
-          scope?: string | null
-          password?: string | null
-          created_at: string
-          updated_at: string
-        }
-        Update: {
-          id?: string
-          account_id?: string
-          provider_id?: string
-          user_id?: string
-          access_token?: string | null
-          refresh_token?: string | null
-          id_token?: string | null
-          access_token_expires_at?: string | null
-          refresh_token_expires_at?: string | null
-          scope?: string | null
-          password?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "account_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      session: {
-        Row: {
-          id: string
-          expires_at: string
-          token: string
-          created_at: string
-          updated_at: string
-          ip_address: string | null
-          user_agent: string | null
-          user_id: string
-          active_organization_id: string | null
-          impersonated_by: string | null
-        }
-        Insert: {
-          id?: string
-          expires_at: string
-          token: string
-          created_at: string
-          updated_at: string
-          ip_address?: string | null
-          user_agent?: string | null
-          user_id: string
-          active_organization_id?: string | null
-          impersonated_by?: string | null
-        }
-        Update: {
-          id?: string
-          expires_at?: string
-          token?: string
-          created_at?: string
-          updated_at?: string
-          ip_address?: string | null
-          user_agent?: string | null
-          user_id?: string
-          active_organization_id?: string | null
-          impersonated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "session_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      verification: {
-        Row: {
-          id: string
-          identifier: string
-          value: string
-          expires_at: string
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          identifier: string
-          value: string
-          expires_at: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          identifier?: string
-          value?: string
-          expires_at?: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      delivery_notes: {
-        Row: {
-          id: string
-          lieferschein_nr: string | null
-          delivery_date: string
-          notes: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          lieferschein_nr?: string | null
-          delivery_date?: string
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          lieferschein_nr?: string | null
-          delivery_date?: string
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      delivery_note_items: {
-        Row: {
-          id: string
-          delivery_note_id: string
-          article_name: string
-          quantity_35: number
-          quantity_65: number
-          quantity_85: number
-          unit_price_cents: number
-          sort_order: number
-        }
-        Insert: {
-          id?: string
-          delivery_note_id: string
-          article_name: string
-          quantity_35?: number
-          quantity_65?: number
-          quantity_85?: number
-          unit_price_cents?: number
-          sort_order?: number
-        }
-        Update: {
-          id?: string
-          delivery_note_id?: string
-          article_name?: string
-          quantity_35?: number
-          quantity_65?: number
-          quantity_85?: number
-          unit_price_cents?: number
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "delivery_note_items_delivery_note_id_fkey"
-            columns: ["delivery_note_id"]
-            isOneToOne: false
-            referencedRelation: "delivery_notes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       app_settings: {
         Row: {
           id: string
@@ -297,6 +51,74 @@ export type Database = {
           id?: string
           setting_key?: string
           setting_value?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_note_items: {
+        Row: {
+          article_name: string
+          delivery_note_id: string
+          id: string
+          quantity_35: number
+          quantity_65: number
+          quantity_85: number
+          sort_order: number
+          unit_price_cents: number
+        }
+        Insert: {
+          article_name: string
+          delivery_note_id: string
+          id?: string
+          quantity_35?: number
+          quantity_65?: number
+          quantity_85?: number
+          sort_order?: number
+          unit_price_cents?: number
+        }
+        Update: {
+          article_name?: string
+          delivery_note_id?: string
+          id?: string
+          quantity_35?: number
+          quantity_65?: number
+          quantity_85?: number
+          sort_order?: number
+          unit_price_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_note_items_delivery_note_id_fkey"
+            columns: ["delivery_note_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_notes: {
+        Row: {
+          created_at: string
+          delivery_date: string
+          id: string
+          lieferschein_nr: string | null
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_date?: string
+          id?: string
+          lieferschein_nr?: string | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_date?: string
+          id?: string
+          lieferschein_nr?: string | null
+          notes?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -430,3 +252,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

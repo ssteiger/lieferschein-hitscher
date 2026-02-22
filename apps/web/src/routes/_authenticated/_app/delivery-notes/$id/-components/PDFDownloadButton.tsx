@@ -72,8 +72,10 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
     pageSize: 'A4' as const,
     pageMargins: [28, 28, 28, 28] as [number, number, number, number],
     content: [
+      // --- Row 1: Warenempfänger (left) and Lieferant (right) boxes ---
       {
         columns: [
+          // Left box: recipient address with logo
           {
             width: '*',
             table: {
@@ -111,6 +113,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                 ],
               ],
             },
+            // 1pt solid black borders on all sides
             layout: {
               hLineWidth: () => 1,
               vLineWidth: () => 1,
@@ -118,7 +121,9 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
               vLineColor: () => '#000',
             },
           },
+          // Borderless gap between the two boxes
           { width: '8%', text: '' },
+          // Right box: supplier details + Pflanzenpass
           {
             width: '*',
             table: {
@@ -147,6 +152,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                 ],
               ],
             },
+            // 1pt solid black borders on all sides
             layout: {
               hLineWidth: () => 1,
               vLineWidth: () => 1,
@@ -159,8 +165,10 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
 
       { text: '', margin: [0, 10, 0, 0] as [number, number, number, number] },
 
+      // --- Row 2: Lieferschein Nr (left) and delivery date (right) ---
       {
         columns: [
+          // Left box: delivery note number
           {
             width: '*',
             table: {
@@ -177,6 +185,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                 ],
               ],
             },
+            // 1pt solid black borders on all sides
             layout: {
               hLineWidth: () => 1,
               vLineWidth: () => 1,
@@ -184,7 +193,9 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
               vLineColor: () => '#000',
             },
           },
+          // Borderless gap
           { width: '8%', text: '' },
+          // Right box: date
           {
             width: '*',
             table: {
@@ -201,6 +212,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                 ],
               ],
             },
+            // 1pt solid black borders on all sides
             layout: {
               hLineWidth: () => 1,
               vLineWidth: () => 1,
@@ -213,29 +225,54 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
 
       { text: '', margin: [0, 10, 0, 0] as [number, number, number, number] },
 
+      // --- Items table: header rows + line items ---
       {
         table: {
           headerRows: 2,
           widths: ['*', 45, 45, 45, 75],
           body: [
+            // Header row 1: column group labels
             [
-              { text: 'Artikel und Topfgröße', bold: true, fontSize: 9, rowSpan: 2, margin: [4, 10, 4, 10] as [number, number, number, number] },
-              { text: 'Stück / VPE', bold: true, fontSize: 9, colSpan: 3, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
+              { 
+                text: 'Artikel und Topfgröße', 
+                bold: true, 
+                fontSize: 9, 
+                margin: [2, 2, 2, 2] as [number, number, number, number],
+                alignment: 'left' as const,
+              },
+              { 
+                text: 'Stück / VPE', 
+                bold: true, 
+                fontSize: 9,
+                colSpan: 3, 
+                alignment: 'center' as const,
+                margin: [2, 2, 2, 2] as [number, number, number, number] 
+              },
               {},
               {},
-              { text: 'Netto\nEinzelpreis\nin \u20AC', bold: true, fontSize: 8, alignment: 'center' as const, rowSpan: 2, margin: [4, 4, 4, 4] as [number, number, number, number] },
+              { 
+                text: 'Netto', 
+                bold: true, 
+                fontSize: 9, 
+                alignment: 'center' as const, 
+                margin: [2, 2, 2, 0] as [number, number, number, number],
+                border: [true, true, true, false],
+              },
             ],
+            // Header row 2: pot size sub-columns (35/65/85)
             [
-              {},
+              { text: 'Bestellnummer', bold: true, fontSize: 9, margin: [4, 4, 4, 4] as [number, number, number, number] },
               { text: '35', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
               { text: '65', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
               { text: '85', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
-              {},
+              { text: 'Einzelpreis\nin \u20AC', bold: true, fontSize: 9, alignment: 'center' as const, margin: [2, 0, 2, 2] as [number, number, number, number], border: [true, false, true, true] },
             ],
+            // Data rows + empty padding rows
             ...itemRows,
             ...emptyRows,
           ],
         },
+        // 0.5pt thin borders for the item grid
         layout: {
           hLineWidth: () => 0.5,
           vLineWidth: () => 0.5,
