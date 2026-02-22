@@ -81,25 +81,29 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
               body: [
                 [
                   {
-                    stack: [
-                      { text: 'Warenempfänger:', bold: true, fontSize: 8, margin: [0, 0, 0, 2] as [number, number, number, number] },
+                    text: 'Warenempfänger:',
+                    bold: true,
+                    fontSize: 10,
+                    alignment: 'center' as const,
+                    margin: [4, 4, 4, 4] as [number, number, number, number],
+                  },
+                ],
+                [
+                  {
+                    columns: [
                       {
-                        columns: [
-                          {
-                            width: '*',
-                            stack: [
-                              { text: 'Loest Blumengrosshandel e.K.', fontSize: 9 },
-                              { text: 'Kirchwerder Marschbahndamm 300', fontSize: 9 },
-                              { text: '21037 Hamburg', fontSize: 9 },
-                            ],
-                          },
-                          {
-                            width: 80,
-                            image: logoBase64,
-                            fit: [75, 50],
-                            alignment: 'right' as const,
-                          },
+                        width: '*',
+                        stack: [
+                          { text: 'Loest Blumengrosshandel e.K.', fontSize: 9 },
+                          { text: 'Kirchwerder Marschbahndamm 300', fontSize: 9 },
+                          { text: '21037 Hamburg', fontSize: 9 },
                         ],
+                      },
+                      {
+                        width: 80,
+                        image: logoBase64,
+                        fit: [75, 50],
+                        alignment: 'right' as const,
                       },
                     ],
                     margin: [6, 6, 6, 6] as [number, number, number, number],
@@ -122,8 +126,16 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
               body: [
                 [
                   {
+                    text: 'Lieferant:',
+                    bold: true,
+                    fontSize: 10,
+                    alignment: 'center' as const,
+                    margin: [4, 4, 4, 4] as [number, number, number, number],
+                  },
+                ],
+                [
+                  {
                     stack: [
-                      { text: 'Lieferant:', bold: true, fontSize: 8, margin: [0, 0, 0, 2] as [number, number, number, number] },
                       { text: 'Ralf Hitscher', fontSize: 9 },
                       { text: 'Süderquerweg 484', fontSize: 9 },
                       { text: '21037 Hamburg', fontSize: 9 },
