@@ -1,0 +1,209 @@
+import { Button } from '~/lib/components/ui/button'
+import { DownloadIcon } from 'lucide-react'
+
+interface DeliveryNoteItem {
+  id?: string
+  article_name: string
+  quantity_35: number
+  quantity_65: number
+  quantity_85: number
+  unit_price_cents: number
+}
+
+export interface PDFDownloadButtonProps {
+  note: {
+    lieferschein_nr: string | null
+    delivery_date: string
+    notes: string | null
+    items: DeliveryNoteItem[]
+  }
+}
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+async function loadImageAsBase64(url: string): Promise<string> {
+  const response = await fetch(url)
+  const blob = await response.blob()
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result as string)
+    reader.readAsDataURL(blob)
+  })
+}
+
+async function downloadPdf(note: PDFDownloadButtonProps['note']) {
+  const pdfMake = await import('pdfmake/build/pdfmake')
+  await import('pdfmake/build/vfs_fonts')
+
+  const logoBase64 = await loadImageAsBase64('/loest_logo.jpg')
+
+  const itemRows = note.items.map((item) => [
+    { text: item.article_name, fontSize: 9, margin: [4, 6, 4, 6] as [number, number, number, number] },
+    { text: item.quantity_35 || '', alignment: 'center' as const, fontSize: 9, margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: item.quantity_65 || '', alignment: 'center' as const, fontSize: 9, margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: item.quantity_85 || '', alignment: 'center' as const, fontSize: 9, margin: [2, 6, 2, 6] as [number, number, number, number] },
+    {
+      text: item.unit_price_cents > 0
+        ? (item.unit_price_cents / 100).toFixed(2).replace('.', ',')
+        : '',
+      alignment: 'right' as const,
+      fontSize: 9,
+      margin: [4, 6, 4, 6] as [number, number, number, number],
+    },
+  ])
+
+  const minRows = 25
+  const emptyRowsNeeded = Math.max(0, minRows - note.items.length)
+  const emptyRows = Array.from({ length: emptyRowsNeeded }, () => [
+    { text: '', margin: [4, 6, 4, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [4, 6, 4, 6] as [number, number, number, number] },
+  ])
+
+  const docDefinition = {
+    pageSize: 'A4' as const,
+    pageMargins: [28, 28, 28, 28] as [number, number, number, number],
+    content: [
+      {
+        table: {
+          widths: ['*', '*'],
+          body: [
+            [
+              {
+                stack: [
+                  { text: 'Warenempfänger:', bold: true, fontSize: 8, margin: [0, 0, 0, 2] as [number, number, number, number] },
+                  {
+                    columns: [
+                      {
+                        width: '*',
+                        stack: [
+                          { text: 'Loest Blumengrosshandel e.K.', fontSize: 9 },
+                          { text: 'Kirchwerder Marschbahndamm 300', fontSize: 9 },
+                          { text: '21037 Hamburg', fontSize: 9 },
+                        ],
+                      },
+                      {
+                        width: 80,
+                        image: logoBase64,
+                        fit: [75, 50],
+                        alignment: 'right' as const,
+                      },
+                    ],
+                  },
+                ],
+                margin: [6, 6, 6, 6] as [number, number, number, number],
+              },
+              {
+                stack: [
+                  { text: 'Lieferant:', bold: true, fontSize: 8, margin: [0, 0, 0, 2] as [number, number, number, number] },
+                  { text: 'Ralf Hitscher', fontSize: 9 },
+                  { text: 'Süderquerweg 484', fontSize: 9 },
+                  { text: '21037 Hamburg', fontSize: 9 },
+                  { text: '', margin: [0, 4, 0, 0] as [number, number, number, number] },
+                  { text: 'Pflanzenpass: DE-HH1-110071', fontSize: 8 },
+                ],
+                margin: [6, 6, 6, 6] as [number, number, number, number],
+              },
+            ],
+          ],
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1,
+          hLineColor: () => '#000',
+          vLineColor: () => '#000',
+        },
+      },
+
+      { text: '', margin: [0, 10, 0, 0] as [number, number, number, number] },
+
+      {
+        table: {
+          widths: ['*', '*'],
+          body: [
+            [
+              {
+                columns: [
+                  { text: 'Lieferschein Nr:', bold: true, fontSize: 10, width: 'auto' },
+                  { text: note.lieferschein_nr || '', fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+                ],
+                border: [true, true, true, true],
+                margin: [4, 4, 4, 4] as [number, number, number, number],
+              },
+              {
+                columns: [
+                  { text: 'Hamburg, den', fontSize: 10, width: 'auto' },
+                  { text: formatDate(note.delivery_date), fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+                ],
+                border: [true, true, true, true],
+                margin: [4, 4, 4, 4] as [number, number, number, number],
+              },
+            ],
+          ],
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1,
+          hLineColor: () => '#000',
+          vLineColor: () => '#000',
+        },
+      },
+
+      { text: '', margin: [0, 10, 0, 0] as [number, number, number, number] },
+
+      {
+        table: {
+          headerRows: 2,
+          widths: ['*', 45, 45, 45, 75],
+          body: [
+            [
+              { text: 'Artikel und Topfgröße', bold: true, fontSize: 9, rowSpan: 2, margin: [4, 10, 4, 10] as [number, number, number, number] },
+              { text: 'Stück / VPE', bold: true, fontSize: 9, colSpan: 3, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
+              {},
+              {},
+              { text: 'Netto\nEinzelpreis\nin \u20AC', bold: true, fontSize: 8, alignment: 'center' as const, rowSpan: 2, margin: [4, 4, 4, 4] as [number, number, number, number] },
+            ],
+            [
+              {},
+              { text: '35', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
+              { text: '65', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
+              { text: '85', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
+              {},
+            ],
+            ...itemRows,
+            ...emptyRows,
+          ],
+        },
+        layout: {
+          hLineWidth: () => 0.5,
+          vLineWidth: () => 0.5,
+          hLineColor: () => '#000',
+          vLineColor: () => '#000',
+        },
+      },
+    ],
+  }
+
+  const filename = note.lieferschein_nr
+    ? `Lieferschein-${note.lieferschein_nr}.pdf`
+    : `Lieferschein-${formatDate(note.delivery_date)}.pdf`
+
+  pdfMake.default.createPdf(docDefinition).download(filename)
+}
+
+export function PDFDownloadButton({ note }: PDFDownloadButtonProps) {
+  return (
+    <Button variant="outline" size="lg" onClick={() => downloadPdf(note)}>
+      <DownloadIcon className="mr-2 h-4 w-4" />
+      PDF
+    </Button>
+  )
+}

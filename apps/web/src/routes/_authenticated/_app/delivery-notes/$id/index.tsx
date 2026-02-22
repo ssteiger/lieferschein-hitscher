@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { eq, asc } from 'drizzle-orm'
-import { postgres_db, schema } from '@lieferschein-hitscher/db-drizzle'
+import { postgres_db, schema, eq, asc } from '@lieferschein-hitscher/db-drizzle'
 import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
 import { Label } from '~/lib/components/ui/label'
@@ -11,7 +10,8 @@ import { Separator } from '~/lib/components/ui/separator'
 import { Skeleton } from '~/lib/components/ui/skeleton'
 import { toast } from 'sonner'
 import { useState } from 'react'
-import { ArrowLeftIcon, SaveIcon, Trash2Icon, PlusIcon, PencilIcon, DownloadIcon } from 'lucide-react'
+import { ArrowLeftIcon, SaveIcon, Trash2Icon, PlusIcon, PencilIcon } from 'lucide-react'
+import { PDFDownloadButton } from './-components/PDFDownloadButton'
 
 interface DeliveryNoteItem {
   id?: string
@@ -122,150 +122,15 @@ function parsePrice(value: string): number {
   return Math.round(parsed * 100)
 }
 
-async function downloadPdf(note: {
-  lieferschein_nr: string | null
-  delivery_date: string
-  notes: string | null
-  items: DeliveryNoteItem[]
-}) {
-  const pdfMake = await import('pdfmake/build/pdfmake')
-  await import('pdfmake/build/vfs_fonts')
-
-  const itemRows = note.items.map((item) => [
-    { text: item.article_name, fontSize: 9 },
-    { text: item.quantity_35 || '', alignment: 'center' as const, fontSize: 9 },
-    { text: item.quantity_65 || '', alignment: 'center' as const, fontSize: 9 },
-    { text: item.quantity_85 || '', alignment: 'center' as const, fontSize: 9 },
-    {
-      text: item.unit_price_cents > 0
-        ? (item.unit_price_cents / 100).toFixed(2).replace('.', ',')
-        : '',
-      alignment: 'right' as const,
-      fontSize: 9,
-    },
-  ])
-
-  const totalQuantity = note.items.reduce(
-    (acc, item) => acc + item.quantity_35 + item.quantity_65 + item.quantity_85,
-    0,
-  )
-
-  const docDefinition = {
-    pageSize: 'A4' as const,
-    pageMargins: [40, 40, 40, 60] as [number, number, number, number],
-    content: [
-      {
-        columns: [
-          {
-            width: '*',
-            stack: [
-              { text: 'Lieferant:', fontSize: 8, color: '#666', margin: [0, 0, 0, 2] as [number, number, number, number] },
-              { text: 'Loest Blumengrosshandel e.K.', fontSize: 10, bold: true },
-              { text: 'Süderquerweg 484', fontSize: 9 },
-              { text: '21037 Hamburg', fontSize: 9 },
-            ],
-          },
-          {
-            width: '*',
-            stack: [
-              { text: 'Warenempfänger:', fontSize: 8, color: '#666', margin: [0, 0, 0, 2] as [number, number, number, number] },
-              { text: 'Ralf Hitscher', fontSize: 10, bold: true },
-              { text: 'Kirchwerder Marschbahndamm 300', fontSize: 9 },
-              { text: '21037 Hamburg', fontSize: 9 },
-            ],
-          },
-        ],
-      },
-      { text: '', margin: [0, 16, 0, 0] as [number, number, number, number] },
-      {
-        columns: [
-          {
-            width: '*',
-            text: `Hamburg, den ${formatDate(note.delivery_date)}`,
-            fontSize: 10,
-          },
-          {
-            width: 'auto',
-            text: `Lieferschein Nr: ${note.lieferschein_nr || '—'}`,
-            fontSize: 10,
-            bold: true,
-          },
-        ],
-      },
-      { text: '', margin: [0, 12, 0, 0] as [number, number, number, number] },
-      {
-        table: {
-          headerRows: 1,
-          widths: ['*', 45, 45, 45, 70],
-          body: [
-            [
-              { text: 'Artikel und Topfgröße', bold: true, fontSize: 9 },
-              { text: '35', bold: true, alignment: 'center' as const, fontSize: 9 },
-              { text: '65', bold: true, alignment: 'center' as const, fontSize: 9 },
-              { text: '85', bold: true, alignment: 'center' as const, fontSize: 9 },
-              { text: 'Netto\nEinzelpreis in €', bold: true, alignment: 'right' as const, fontSize: 8 },
-            ],
-            ...itemRows,
-          ],
-        },
-        layout: {
-          hLineWidth: (i: number, node: { table: { body: unknown[] } }) =>
-            i === 0 || i === 1 || i === node.table.body.length ? 1 : 0.5,
-          vLineWidth: () => 0.5,
-          hLineColor: (i: number) => (i <= 1 ? '#333' : '#ccc'),
-          vLineColor: () => '#ccc',
-          paddingLeft: () => 6,
-          paddingRight: () => 6,
-          paddingTop: () => 4,
-          paddingBottom: () => 4,
-        },
-      },
-      {
-        margin: [0, 8, 0, 0] as [number, number, number, number],
-        columns: [
-          { width: '*', text: '' },
-          {
-            width: 'auto',
-            text: `Gesamt: ${totalQuantity} Stück`,
-            fontSize: 9,
-            bold: true,
-          },
-        ],
-      },
-      ...(note.notes
-        ? [
-            { text: '', margin: [0, 12, 0, 0] as [number, number, number, number] },
-            { text: 'Notizen:', fontSize: 8, color: '#666' },
-            { text: note.notes, fontSize: 9, margin: [0, 2, 0, 0] as [number, number, number, number] },
-          ]
-        : []),
-      { text: '', margin: [0, 20, 0, 0] as [number, number, number, number] },
-      {
-        text: 'Pflanzenpass: DE-HH1-110071',
-        fontSize: 8,
-        color: '#666',
-      },
-    ],
-  }
-
-  const filename = note.lieferschein_nr
-    ? `Lieferschein-${note.lieferschein_nr}.pdf`
-    : `Lieferschein-${formatDate(note.delivery_date)}.pdf`
-
-  pdfMake.default.createPdf(docDefinition).download(filename)
-}
-
 function ReadOnlyView({
   note,
   onEdit,
   onDelete,
-  onDownloadPdf,
   isDeleting,
 }: {
   note: { lieferschein_nr: string | null; delivery_date: string; notes: string | null; items: DeliveryNoteItem[] }
   onEdit: () => void
   onDelete: () => void
-  onDownloadPdf: () => void
   isDeleting: boolean
 }) {
   const totalItems = note.items.reduce(
@@ -352,10 +217,7 @@ function ReadOnlyView({
           <PencilIcon className="mr-2 h-4 w-4" />
           Bearbeiten
         </Button>
-        <Button variant="outline" size="lg" onClick={onDownloadPdf}>
-          <DownloadIcon className="mr-2 h-4 w-4" />
-          PDF
-        </Button>
+        <PDFDownloadButton note={note} />
         <Button variant="destructive" size="lg" onClick={onDelete} disabled={isDeleting}>
           <Trash2Icon className="mr-2 h-4 w-4" />
           {isDeleting ? 'Wird gelöscht...' : 'Löschen'}
@@ -604,7 +466,6 @@ const DeliveryNoteDetailPage = () => {
             note={note}
             onEdit={() => setEditing(true)}
             onDelete={() => deleteMutation.mutate()}
-            onDownloadPdf={() => downloadPdf(note)}
             isDeleting={deleteMutation.isPending}
           />
         )}
@@ -613,6 +474,6 @@ const DeliveryNoteDetailPage = () => {
   )
 }
 
-export const Route = createFileRoute('/_authenticated/_app/delivery-notes/$id')({
+export const Route = createFileRoute('/_authenticated/_app/delivery-notes/$id/')({
   component: DeliveryNoteDetailPage,
 })
