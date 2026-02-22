@@ -9,6 +9,7 @@ import { useRef, useState } from 'react'
 import { ArrowLeftIcon, SaveIcon, PlusIcon, PrinterIcon } from 'lucide-react'
 import { LieferscheinForm } from './-components/LieferscheinForm'
 import { PDFDownloadButton } from './$id/-components/PDFDownloadButton'
+import { SaveDrawer } from './-components/DrawerSave'
 import { useReactToPrint } from 'react-to-print'
 
 interface DeliveryNoteItem {
@@ -105,6 +106,7 @@ const NewDeliveryNotePage = () => {
   const [notes, setNotes] = useState('')
   const [items, setItems] = useState<DeliveryNoteItem[]>([])
   const [customArticle, setCustomArticle] = useState('')
+  const [saveDrawerOpen, setSaveDrawerOpen] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
 
   const handlePrint = useReactToPrint({
@@ -138,8 +140,7 @@ const NewDeliveryNotePage = () => {
     mutationFn: (data: CreateDeliveryNoteInput) => createDeliveryNote({ data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['delivery-notes'] })
-      toast.success('Lieferschein erstellt')
-      navigate({ to: '/delivery-notes/overview' })
+      setSaveDrawerOpen(true)
     },
     onError: (error) => {
       toast.error(`Fehler beim Erstellen: ${error.message}`)
@@ -239,26 +240,30 @@ const NewDeliveryNotePage = () => {
         </div>
 
         <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4 sm:static sm:border-0 sm:bg-transparent sm:p-0">
-          <div className="flex gap-2">
-            <Button className="flex-1" size="lg" onClick={handleSubmit} disabled={mutation.isPending}>
-              <SaveIcon className="mr-2 h-4 w-4" />
-              {mutation.isPending ? 'Wird gespeichert...' : 'Lieferschein speichern'}
-            </Button>
-            <Button variant="outline" size="lg" onClick={() => handlePrint()}>
-              <PrinterIcon className="mr-2 h-4 w-4" />
-              Drucken
-            </Button>
-            <PDFDownloadButton
-              note={{
-                lieferschein_nr: lieferscheinNr || null,
-                bestellnummer: bestellnummer || null,
-                delivery_date: deliveryDate,
-                notes: notes || null,
-                items,
-              }}
-            />
-          </div>
+          <Button className="w-full" size="lg" onClick={handleSubmit} disabled={mutation.isPending}>
+            <SaveIcon className="mr-2 h-4 w-4" />
+            {mutation.isPending ? 'Wird gespeichert...' : 'Lieferschein speichern'}
+          </Button>
         </div>
+
+        <SaveDrawer
+          open={saveDrawerOpen}
+          onClose={() => navigate({ to: '/delivery-notes/overview' })}
+        >
+          <Button size="lg" variant="outline" onClick={() => handlePrint()}>
+            <PrinterIcon className="mr-2 h-4 w-4" />
+            Drucken
+          </Button>
+          <PDFDownloadButton
+            note={{
+              lieferschein_nr: lieferscheinNr || null,
+              bestellnummer: bestellnummer || null,
+              delivery_date: deliveryDate,
+              notes: notes || null,
+              items,
+            }}
+          />
+        </SaveDrawer>
       </div>
     </div>
   )
