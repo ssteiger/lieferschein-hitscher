@@ -6,7 +6,7 @@ import { PriceDrawer } from './DrawerPrice'
 import { LieferscheinNrDrawer } from './DrawerLieferscheinNr'
 import { DateDrawer } from './DrawerDate'
 
-interface DeliveryNoteItem {
+export interface DeliveryNoteItem {
   article_name: string
   quantities: number[]
   unit_price_cents: number
@@ -14,15 +14,16 @@ interface DeliveryNoteItem {
 
 interface LieferscheinFormProps {
   lieferscheinNr: string
-  onLieferscheinNrChange: (value: string) => void
+  onLieferscheinNrChange?: (value: string) => void
   bestellnummer: string
-  onBestellnummerChange: (value: string) => void
+  onBestellnummerChange?: (value: string) => void
   deliveryDate: string
-  onDeliveryDateChange: (value: string) => void
+  onDeliveryDateChange?: (value: string) => void
   items: DeliveryNoteItem[]
-  onRemoveItem: (index: number) => void
-  onUpdateItemQuantity: (index: number, chunkIndex: number, value: number) => void
-  onUpdateItemPrice: (index: number, cents: number) => void
+  onRemoveItem?: (index: number) => void
+  onUpdateItemQuantity?: (index: number, chunkIndex: number, value: number) => void
+  onUpdateItemPrice?: (index: number, cents: number) => void
+  disabled?: boolean
 }
 
 function splitBestellnummer(nr: string): string[] {
@@ -39,7 +40,7 @@ function formatPrice(cents: number) {
   return (cents / 100).toFixed(2)
 }
 
-export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr, onLieferscheinNrChange, bestellnummer, onBestellnummerChange, deliveryDate, onDeliveryDateChange, items, onRemoveItem, onUpdateItemQuantity, onUpdateItemPrice }: LieferscheinFormProps & { ref?: React.RefObject<HTMLDivElement | null> }) {
+export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr, onLieferscheinNrChange, bestellnummer, onBestellnummerChange, deliveryDate, onDeliveryDateChange, items, onRemoveItem, onUpdateItemQuantity, onUpdateItemPrice, disabled = false }: LieferscheinFormProps & { ref?: React.RefObject<HTMLDivElement | null> }) {
   const bestellChunks = splitBestellnummer(bestellnummer)
   const [priceEditIndex, setPriceEditIndex] = useState<number | null>(null)
   const [lieferscheinNrDrawerOpen, setLieferscheinNrDrawerOpen] = useState(false)
@@ -49,7 +50,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
     const digits = value.replace(/\D/g, '').slice(0, 2)
     const chunks = splitBestellnummer(bestellnummer)
     chunks[index] = digits
-    onBestellnummerChange(chunks.join(''))
+    onBestellnummerChange?.(chunks.join(''))
   }
 
   return (
@@ -85,24 +86,26 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
       <div className="grid grid-cols-[1fr_1fr] gap-4">
         <button
           type="button"
-          className="flex items-center gap-2 border border-black px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors"
+          disabled={disabled}
+          className="flex items-center gap-2 border border-black px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
           onClick={() => setLieferscheinNrDrawerOpen(true)}
         >
           <span className="text-sm font-bold whitespace-nowrap">Lieferschein Nr:</span>
           <span className="text-sm border-b border-black px-1 flex-1">
-            {lieferscheinNr || <span className="text-muted-foreground">z.B. 2026-001</span>}
+            {lieferscheinNr || <span className="text-muted-foreground">{disabled ? '—' : 'z.B. 2026-001'}</span>}
           </span>
         </button>
         <button
           type="button"
-          className="flex items-center gap-2 border border-black px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors"
+          disabled={disabled}
+          className="flex items-center gap-2 border border-black px-3 py-1.5 text-left cursor-pointer hover:bg-muted/50 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
           onClick={() => setDateDrawerOpen(true)}
         >
           <span className="text-sm font-bold whitespace-nowrap">Hamburg, den</span>
           <span className="text-sm border-b border-black px-1 flex-1">
             {deliveryDate
               ? new Date(deliveryDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-              : <span className="text-muted-foreground">Datum wählen</span>}
+              : <span className="text-muted-foreground">{disabled ? '—' : 'Datum wählen'}</span>}
           </span>
         </button>
       </div>
@@ -131,6 +134,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
                   className="h-8 w-full border-0 shadow-none text-center text-lg font-extrabold px-0 focus-visible:ring-0"
                   inputMode="numeric"
                   maxLength={2}
+                  disabled={disabled}
                   value={bestellChunks[pos]}
                   onChange={(e) => handleChunkChange(pos, e.target.value)}
                 />
@@ -143,21 +147,23 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
             </th>
           </tr>
         </thead>
-        
+
         <tbody>
           {items.map((item, index) => (
             <tr key={item.article_name} className="group">
               <td className="border border-black px-2 py-1 text-xs">
                 <div className="flex items-center justify-between">
                   <span>{item.article_name}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity print:hidden"
-                    onClick={() => onRemoveItem(index)}
-                  >
-                    <Trash2Icon className="h-3 w-3 text-muted-foreground" />
-                  </Button>
+                  {!disabled && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity print:hidden"
+                      onClick={() => onRemoveItem?.(index)}
+                    >
+                      <Trash2Icon className="h-3 w-3 text-muted-foreground" />
+                    </Button>
+                  )}
                 </div>
               </td>
               {[0, 1, 2, 3, 4, 5].map((chunkIdx) => {
@@ -167,10 +173,10 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
                     <Input
                       type="text"
                       inputMode="numeric"
-                      disabled={chunkEmpty}
+                      disabled={disabled || chunkEmpty}
                       className="h-7 w-full border-0 shadow-none text-center text-xs px-0 focus-visible:ring-0 disabled:opacity-40"
                       value={item.quantities[chunkIdx] || ''}
-                      onChange={(e) => onUpdateItemQuantity(index, chunkIdx, Number.parseInt(e.target.value) || 0)}
+                      onChange={(e) => onUpdateItemQuantity?.(index, chunkIdx, Number.parseInt(e.target.value) || 0)}
                     />
                   </td>
                 )
@@ -178,7 +184,8 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
               <td className="border border-black px-1 py-0.5">
                 <button
                   type="button"
-                  className="h-7 w-full text-right text-xs px-1 cursor-pointer hover:bg-muted/50 rounded transition-colors"
+                  disabled={disabled}
+                  className="h-7 w-full text-right text-xs px-1 cursor-pointer hover:bg-muted/50 rounded transition-colors disabled:cursor-default disabled:hover:bg-transparent"
                   onClick={() => setPriceEditIndex(index)}
                 >
                   {item.unit_price_cents > 0 ? formatPrice(item.unit_price_cents) : <span className="text-muted-foreground">0,00</span>}
@@ -209,36 +216,40 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
         </tbody>
       </table>
 
-      <DateDrawer
-        open={dateDrawerOpen}
-        initialValue={deliveryDate}
-        onSubmit={(value) => {
-          onDeliveryDateChange(value)
-          setDateDrawerOpen(false)
-        }}
-        onClose={() => setDateDrawerOpen(false)}
-      />
+      {!disabled && (
+        <>
+          <DateDrawer
+            open={dateDrawerOpen}
+            initialValue={deliveryDate}
+            onSubmit={(value) => {
+              onDeliveryDateChange?.(value)
+              setDateDrawerOpen(false)
+            }}
+            onClose={() => setDateDrawerOpen(false)}
+          />
 
-      <LieferscheinNrDrawer
-        open={lieferscheinNrDrawerOpen}
-        initialValue={lieferscheinNr}
-        onSubmit={(value) => {
-          onLieferscheinNrChange(value)
-          setLieferscheinNrDrawerOpen(false)
-        }}
-        onClose={() => setLieferscheinNrDrawerOpen(false)}
-      />
+          <LieferscheinNrDrawer
+            open={lieferscheinNrDrawerOpen}
+            initialValue={lieferscheinNr}
+            onSubmit={(value) => {
+              onLieferscheinNrChange?.(value)
+              setLieferscheinNrDrawerOpen(false)
+            }}
+            onClose={() => setLieferscheinNrDrawerOpen(false)}
+          />
 
-      <PriceDrawer
-        open={priceEditIndex !== null}
-        articleName={priceEditIndex !== null ? items[priceEditIndex]?.article_name ?? 'Einzelpreis' : 'Einzelpreis'}
-        initialCents={priceEditIndex !== null ? items[priceEditIndex]?.unit_price_cents ?? 0 : 0}
-        onSubmit={(cents) => {
-          if (priceEditIndex !== null) onUpdateItemPrice(priceEditIndex, cents)
-          setPriceEditIndex(null)
-        }}
-        onClose={() => setPriceEditIndex(null)}
-      />
+          <PriceDrawer
+            open={priceEditIndex !== null}
+            articleName={priceEditIndex !== null ? items[priceEditIndex]?.article_name ?? 'Einzelpreis' : 'Einzelpreis'}
+            initialCents={priceEditIndex !== null ? items[priceEditIndex]?.unit_price_cents ?? 0 : 0}
+            onSubmit={(cents) => {
+              if (priceEditIndex !== null) onUpdateItemPrice?.(priceEditIndex, cents)
+              setPriceEditIndex(null)
+            }}
+            onClose={() => setPriceEditIndex(null)}
+          />
+        </>
+      )}
     </div>
   )
 }

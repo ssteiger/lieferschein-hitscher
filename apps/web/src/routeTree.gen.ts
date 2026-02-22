@@ -25,6 +25,7 @@ import { Route as AuthenticatedAppSettingsDisplayIndexImport } from './routes/_a
 import { Route as AuthenticatedAppSettingsAppearanceIndexImport } from './routes/_authenticated/_app/settings/appearance/index'
 import { Route as AuthenticatedAppSettingsAccountIndexImport } from './routes/_authenticated/_app/settings/account/index'
 import { Route as AuthenticatedAppDeliveryNotesIdIndexImport } from './routes/_authenticated/_app/delivery-notes/$id/index'
+import { Route as AuthenticatedAppDeliveryNotesIdEditImport } from './routes/_authenticated/_app/delivery-notes/$id/edit'
 
 // Create/Update Routes
 
@@ -118,6 +119,13 @@ const AuthenticatedAppDeliveryNotesIdIndexRoute =
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 
+const AuthenticatedAppDeliveryNotesIdEditRoute =
+  AuthenticatedAppDeliveryNotesIdEditImport.update({
+    id: '/delivery-notes/$id/edit',
+    path: '/delivery-notes/$id/edit',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -185,6 +193,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSettingsIndexImport
       parentRoute: typeof AuthenticatedAppImport
     }
+    '/_authenticated/_app/delivery-notes/$id/edit': {
+      id: '/_authenticated/_app/delivery-notes/$id/edit'
+      path: '/delivery-notes/$id/edit'
+      fullPath: '/delivery-notes/$id/edit'
+      preLoaderRoute: typeof AuthenticatedAppDeliveryNotesIdEditImport
+      parentRoute: typeof AuthenticatedAppImport
+    }
     '/_authenticated/_app/delivery-notes/$id/': {
       id: '/_authenticated/_app/delivery-notes/$id/'
       path: '/delivery-notes/$id'
@@ -231,6 +246,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppDeliveryNotesOverviewRoute: typeof AuthenticatedAppDeliveryNotesOverviewRoute
   AuthenticatedAppHomeIndexRoute: typeof AuthenticatedAppHomeIndexRoute
   AuthenticatedAppSettingsIndexRoute: typeof AuthenticatedAppSettingsIndexRoute
+  AuthenticatedAppDeliveryNotesIdEditRoute: typeof AuthenticatedAppDeliveryNotesIdEditRoute
   AuthenticatedAppDeliveryNotesIdIndexRoute: typeof AuthenticatedAppDeliveryNotesIdIndexRoute
   AuthenticatedAppSettingsAccountIndexRoute: typeof AuthenticatedAppSettingsAccountIndexRoute
   AuthenticatedAppSettingsAppearanceIndexRoute: typeof AuthenticatedAppSettingsAppearanceIndexRoute
@@ -245,6 +261,8 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
     AuthenticatedAppDeliveryNotesOverviewRoute,
   AuthenticatedAppHomeIndexRoute: AuthenticatedAppHomeIndexRoute,
   AuthenticatedAppSettingsIndexRoute: AuthenticatedAppSettingsIndexRoute,
+  AuthenticatedAppDeliveryNotesIdEditRoute:
+    AuthenticatedAppDeliveryNotesIdEditRoute,
   AuthenticatedAppDeliveryNotesIdIndexRoute:
     AuthenticatedAppDeliveryNotesIdIndexRoute,
   AuthenticatedAppSettingsAccountIndexRoute:
@@ -281,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/delivery-notes/overview': typeof AuthenticatedAppDeliveryNotesOverviewRoute
   '/home': typeof AuthenticatedAppHomeIndexRoute
   '/settings': typeof AuthenticatedAppSettingsIndexRoute
+  '/delivery-notes/$id/edit': typeof AuthenticatedAppDeliveryNotesIdEditRoute
   '/delivery-notes/$id': typeof AuthenticatedAppDeliveryNotesIdIndexRoute
   '/settings/account': typeof AuthenticatedAppSettingsAccountIndexRoute
   '/settings/appearance': typeof AuthenticatedAppSettingsAppearanceIndexRoute
@@ -297,6 +316,7 @@ export interface FileRoutesByTo {
   '/delivery-notes/overview': typeof AuthenticatedAppDeliveryNotesOverviewRoute
   '/home': typeof AuthenticatedAppHomeIndexRoute
   '/settings': typeof AuthenticatedAppSettingsIndexRoute
+  '/delivery-notes/$id/edit': typeof AuthenticatedAppDeliveryNotesIdEditRoute
   '/delivery-notes/$id': typeof AuthenticatedAppDeliveryNotesIdIndexRoute
   '/settings/account': typeof AuthenticatedAppSettingsAccountIndexRoute
   '/settings/appearance': typeof AuthenticatedAppSettingsAppearanceIndexRoute
@@ -315,6 +335,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/delivery-notes/overview': typeof AuthenticatedAppDeliveryNotesOverviewRoute
   '/_authenticated/_app/home/': typeof AuthenticatedAppHomeIndexRoute
   '/_authenticated/_app/settings/': typeof AuthenticatedAppSettingsIndexRoute
+  '/_authenticated/_app/delivery-notes/$id/edit': typeof AuthenticatedAppDeliveryNotesIdEditRoute
   '/_authenticated/_app/delivery-notes/$id/': typeof AuthenticatedAppDeliveryNotesIdIndexRoute
   '/_authenticated/_app/settings/account/': typeof AuthenticatedAppSettingsAccountIndexRoute
   '/_authenticated/_app/settings/appearance/': typeof AuthenticatedAppSettingsAppearanceIndexRoute
@@ -333,6 +354,7 @@ export interface FileRouteTypes {
     | '/delivery-notes/overview'
     | '/home'
     | '/settings'
+    | '/delivery-notes/$id/edit'
     | '/delivery-notes/$id'
     | '/settings/account'
     | '/settings/appearance'
@@ -348,6 +370,7 @@ export interface FileRouteTypes {
     | '/delivery-notes/overview'
     | '/home'
     | '/settings'
+    | '/delivery-notes/$id/edit'
     | '/delivery-notes/$id'
     | '/settings/account'
     | '/settings/appearance'
@@ -364,6 +387,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/delivery-notes/overview'
     | '/_authenticated/_app/home/'
     | '/_authenticated/_app/settings/'
+    | '/_authenticated/_app/delivery-notes/$id/edit'
     | '/_authenticated/_app/delivery-notes/$id/'
     | '/_authenticated/_app/settings/account/'
     | '/_authenticated/_app/settings/appearance/'
@@ -414,6 +438,7 @@ export const routeTree = rootRoute
         "/_authenticated/_app/delivery-notes/overview",
         "/_authenticated/_app/home/",
         "/_authenticated/_app/settings/",
+        "/_authenticated/_app/delivery-notes/$id/edit",
         "/_authenticated/_app/delivery-notes/$id/",
         "/_authenticated/_app/settings/account/",
         "/_authenticated/_app/settings/appearance/",
@@ -445,6 +470,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/_app/settings/": {
       "filePath": "_authenticated/_app/settings/index.tsx",
+      "parent": "/_authenticated/_app"
+    },
+    "/_authenticated/_app/delivery-notes/$id/edit": {
+      "filePath": "_authenticated/_app/delivery-notes/$id/edit.tsx",
       "parent": "/_authenticated/_app"
     },
     "/_authenticated/_app/delivery-notes/$id/": {
