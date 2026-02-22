@@ -58,7 +58,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
     },
   ])
 
-  const minRows = 25
+  const minRows = 15
   const emptyRowsNeeded = Math.max(0, minRows - note.items.length)
   const emptyRows = Array.from({ length: emptyRowsNeeded }, () => [
     { text: '', margin: [4, 6, 4, 6] as [number, number, number, number] },
@@ -73,88 +73,130 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
     pageMargins: [28, 28, 28, 28] as [number, number, number, number],
     content: [
       {
-        table: {
-          widths: ['*', '*'],
-          body: [
-            [
-              {
-                stack: [
-                  { text: 'Warenempfänger:', bold: true, fontSize: 8, margin: [0, 0, 0, 2] as [number, number, number, number] },
+        columns: [
+          {
+            width: '*',
+            table: {
+              widths: ['*'],
+              body: [
+                [
                   {
-                    columns: [
+                    stack: [
+                      { text: 'Warenempfänger:', bold: true, fontSize: 8, margin: [0, 0, 0, 2] as [number, number, number, number] },
                       {
-                        width: '*',
-                        stack: [
-                          { text: 'Loest Blumengrosshandel e.K.', fontSize: 9 },
-                          { text: 'Kirchwerder Marschbahndamm 300', fontSize: 9 },
-                          { text: '21037 Hamburg', fontSize: 9 },
+                        columns: [
+                          {
+                            width: '*',
+                            stack: [
+                              { text: 'Loest Blumengrosshandel e.K.', fontSize: 9 },
+                              { text: 'Kirchwerder Marschbahndamm 300', fontSize: 9 },
+                              { text: '21037 Hamburg', fontSize: 9 },
+                            ],
+                          },
+                          {
+                            width: 80,
+                            image: logoBase64,
+                            fit: [75, 50],
+                            alignment: 'right' as const,
+                          },
                         ],
                       },
-                      {
-                        width: 80,
-                        image: logoBase64,
-                        fit: [75, 50],
-                        alignment: 'right' as const,
-                      },
                     ],
+                    margin: [6, 6, 6, 6] as [number, number, number, number],
                   },
                 ],
-                margin: [6, 6, 6, 6] as [number, number, number, number],
-              },
-              {
-                stack: [
-                  { text: 'Lieferant:', bold: true, fontSize: 8, margin: [0, 0, 0, 2] as [number, number, number, number] },
-                  { text: 'Ralf Hitscher', fontSize: 9 },
-                  { text: 'Süderquerweg 484', fontSize: 9 },
-                  { text: '21037 Hamburg', fontSize: 9 },
-                  { text: '', margin: [0, 4, 0, 0] as [number, number, number, number] },
-                  { text: 'Pflanzenpass: DE-HH1-110071', fontSize: 8 },
+              ],
+            },
+            layout: {
+              hLineWidth: () => 1,
+              vLineWidth: () => 1,
+              hLineColor: () => '#000',
+              vLineColor: () => '#000',
+            },
+          },
+          { width: '8%', text: '' },
+          {
+            width: '*',
+            table: {
+              widths: ['*'],
+              body: [
+                [
+                  {
+                    stack: [
+                      { text: 'Lieferant:', bold: true, fontSize: 8, margin: [0, 0, 0, 2] as [number, number, number, number] },
+                      { text: 'Ralf Hitscher', fontSize: 9 },
+                      { text: 'Süderquerweg 484', fontSize: 9 },
+                      { text: '21037 Hamburg', fontSize: 9 },
+                      { text: '', margin: [0, 4, 0, 0] as [number, number, number, number] },
+                      { text: 'Pflanzenpass: DE-HH1-110071', fontSize: 8 },
+                    ],
+                    margin: [6, 6, 6, 6] as [number, number, number, number],
+                  },
                 ],
-                margin: [6, 6, 6, 6] as [number, number, number, number],
-              },
-            ],
-          ],
-        },
-        layout: {
-          hLineWidth: () => 1,
-          vLineWidth: () => 1,
-          hLineColor: () => '#000',
-          vLineColor: () => '#000',
-        },
+              ],
+            },
+            layout: {
+              hLineWidth: () => 1,
+              vLineWidth: () => 1,
+              hLineColor: () => '#000',
+              vLineColor: () => '#000',
+            },
+          },
+        ],
       },
 
       { text: '', margin: [0, 10, 0, 0] as [number, number, number, number] },
 
       {
-        table: {
-          widths: ['*', '*'],
-          body: [
-            [
-              {
-                columns: [
-                  { text: 'Lieferschein Nr:', bold: true, fontSize: 10, width: 'auto' },
-                  { text: note.lieferschein_nr || '', fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+        columns: [
+          {
+            width: '*',
+            table: {
+              widths: ['*'],
+              body: [
+                [
+                  {
+                    columns: [
+                      { text: 'Lieferschein Nr:', bold: true, fontSize: 10, width: 'auto' },
+                      { text: note.lieferschein_nr || '', fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+                    ],
+                    margin: [4, 4, 4, 4] as [number, number, number, number],
+                  },
                 ],
-                border: [true, true, true, true],
-                margin: [4, 4, 4, 4] as [number, number, number, number],
-              },
-              {
-                columns: [
-                  { text: 'Hamburg, den', fontSize: 10, width: 'auto' },
-                  { text: formatDate(note.delivery_date), fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+              ],
+            },
+            layout: {
+              hLineWidth: () => 1,
+              vLineWidth: () => 1,
+              hLineColor: () => '#000',
+              vLineColor: () => '#000',
+            },
+          },
+          { width: '8%', text: '' },
+          {
+            width: '*',
+            table: {
+              widths: ['*'],
+              body: [
+                [
+                  {
+                    columns: [
+                      { text: 'Hamburg, den', fontSize: 10, width: 'auto' },
+                      { text: formatDate(note.delivery_date), fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+                    ],
+                    margin: [4, 4, 4, 4] as [number, number, number, number],
+                  },
                 ],
-                border: [true, true, true, true],
-                margin: [4, 4, 4, 4] as [number, number, number, number],
-              },
-            ],
-          ],
-        },
-        layout: {
-          hLineWidth: () => 1,
-          vLineWidth: () => 1,
-          hLineColor: () => '#000',
-          vLineColor: () => '#000',
-        },
+              ],
+            },
+            layout: {
+              hLineWidth: () => 1,
+              vLineWidth: () => 1,
+              hLineColor: () => '#000',
+              vLineColor: () => '#000',
+            },
+          },
+        ],
       },
 
       { text: '', margin: [0, 10, 0, 0] as [number, number, number, number] },
