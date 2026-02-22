@@ -24,7 +24,7 @@ interface LieferscheinFormProps {
   onRemoveItem?: (index: number) => void
   onUpdateItemQuantity?: (index: number, chunkIndex: number, value: number) => void
   onUpdateItemPrice?: (index: number, cents: number) => void
-  onAddItem?: (articleName: string) => void
+  onSetItems?: (articles: string[]) => void
   disabled?: boolean
 }
 
@@ -42,7 +42,7 @@ function formatPrice(cents: number) {
   return (cents / 100).toFixed(2)
 }
 
-export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr, onLieferscheinNrChange, bestellnummer, onBestellnummerChange, deliveryDate, onDeliveryDateChange, items, onRemoveItem, onUpdateItemQuantity, onUpdateItemPrice, onAddItem, disabled = false }: LieferscheinFormProps & { ref?: React.RefObject<HTMLDivElement | null> }) {
+export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr, onLieferscheinNrChange, bestellnummer, onBestellnummerChange, deliveryDate, onDeliveryDateChange, items, onRemoveItem, onUpdateItemQuantity, onUpdateItemPrice, onSetItems, disabled = false }: LieferscheinFormProps & { ref?: React.RefObject<HTMLDivElement | null> }) {
   const bestellChunks = splitBestellnummer(bestellnummer)
   const [priceEditIndex, setPriceEditIndex] = useState<number | null>(null)
   const [lieferscheinNrDrawerOpen, setLieferscheinNrDrawerOpen] = useState(false)
@@ -220,7 +220,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
         </tbody>
       </table>
 
-      {!disabled && onAddItem && (
+          {!disabled && onSetItems && (
         <Button
           type="button"
           variant="outline"
@@ -268,9 +268,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
           <ProductSelectDrawer
             open={productDrawerOpen}
             existingArticles={items.map((item) => item.article_name)}
-            onSelect={(name) => {
-              onAddItem?.(name)
-            }}
+            onSubmit={(selected) => onSetItems?.(selected)}
             onClose={() => setProductDrawerOpen(false)}
           />
         </>

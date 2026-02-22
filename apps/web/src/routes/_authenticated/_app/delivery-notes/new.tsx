@@ -116,11 +116,11 @@ const NewDeliveryNotePage = () => {
     setItems((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const addItem = (articleName: string) => {
-    setItems((prev) => [
-      ...prev,
-      { article_name: articleName, quantities: [0, 0, 0, 0, 0, 0], unit_price_cents: 0 },
-    ])
+  const setItemsByArticles = (articles: string[]) => {
+    setItems((prev) => {
+      const existing = new Map(prev.map((item) => [item.article_name, item]))
+      return articles.map((name) => existing.get(name) ?? { article_name: name, quantities: [0, 0, 0, 0, 0, 0], unit_price_cents: 0 })
+    })
   }
 
   return (
@@ -145,7 +145,7 @@ const NewDeliveryNotePage = () => {
           onRemoveItem={removeItem}
           onUpdateItemQuantity={updateItemQuantity}
           onUpdateItemPrice={updateItemPrice}
-          onAddItem={addItem}
+          onSetItems={setItemsByArticles}
         />
 
         <div className="flex items-center gap-2">

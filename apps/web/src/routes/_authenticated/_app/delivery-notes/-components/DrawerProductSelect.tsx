@@ -4,7 +4,6 @@ import { Input } from '~/lib/components/ui/input'
 import { CheckIcon, PlusIcon } from 'lucide-react'
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
@@ -38,29 +37,46 @@ const DEFAULT_ARTICLES = [
 interface ProductSelectDrawerProps {
   open: boolean
   existingArticles: string[]
-  onSelect: (articleName: string) => void
+  onSubmit: (selected: string[]) => void
   onClose: () => void
 }
 
-export function ProductSelectDrawer({ open, existingArticles, onSelect, onClose }: ProductSelectDrawerProps) {
+export function ProductSelectDrawer({ open, existingArticles, onSubmit, onClose }: ProductSelectDrawerProps) {
+  const [selected, setSelected] = useState<string[]>([])
   const [customName, setCustomName] = useState('')
 
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
+      setSelected([...existingArticles])
       setCustomName('')
     } else {
       onClose()
     }
   }
 
+  const toggle = (article: string) => {
+    setSelected((prev) =>
+      prev.includes(article) ? prev.filter((a) => a !== article) : [...prev, article],
+    )
+  }
+
   const handleAddCustom = () => {
     const name = customName.trim()
-    if (!name) return
-    onSelect(name)
+    if (!name || selected.includes(name)) return
+    setSelected((prev) => [...prev, name])
     setCustomName('')
   }
 
-  const alreadyAdded = new Set(existingArticles)
+  const handleSubmit = () => {
+    onSubmit(selected)
+    onClose()
+  }
+
+  const handleCancel = () => {
+    onClose()
+  }
+
+  const selectedSet = new Set(selected)
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
@@ -72,17 +88,16 @@ export function ProductSelectDrawer({ open, existingArticles, onSelect, onClose 
           <div className="px-4 pb-2 max-h-[50vh] overflow-y-auto">
             <div className="space-y-1">
               {DEFAULT_ARTICLES.map((article) => {
-                const added = alreadyAdded.has(article)
+                const isSelected = selectedSet.has(article)
                 return (
                   <button
                     key={article}
                     type="button"
-                    disabled={added}
-                    className="flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-default"
-                    onClick={() => onSelect(article)}
+                    className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition-colors ${isSelected ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'hover:bg-muted'}`}
+                    onClick={() => toggle(article)}
                   >
                     <span>{article}</span>
-                    {added && <CheckIcon className="h-4 w-4 text-muted-foreground" />}
+                    {isSelected && <CheckIcon className="h-4 w-4" />}
                   </button>
                 )
               })}
@@ -100,9 +115,8 @@ export function ProductSelectDrawer({ open, existingArticles, onSelect, onClose 
             </div>
           </div>
           <DrawerFooter>
-            <DrawerClose asChild>
-              <Button variant="outline">Schließen</Button>
-            </DrawerClose>
+            <Button onClick={handleSubmit}>Übernehmen</Button>
+            <Button variant="outline" onClick={handleCancel}>Abbrechen</Button>
           </DrawerFooter>
         </div>
       </DrawerContent>
