@@ -173,7 +173,7 @@ const NewDeliveryNotePage = () => {
             Drucken
           </Button>
           <PDFDownloadButton
-            note={{
+            deliveryNote={{
               lieferschein_nr: lieferscheinNr || null,
               bestellnummer: bestellnummer || null,
               delivery_date: deliveryDate,

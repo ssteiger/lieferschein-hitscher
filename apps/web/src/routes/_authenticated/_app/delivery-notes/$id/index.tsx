@@ -112,7 +112,7 @@ const DeliveryNoteDetailPage = () => {
             <PrinterIcon className="mr-2 h-4 w-4" />
             Drucken
           </Button>
-          <PDFDownloadButton note={note} />
+          <PDFDownloadButton deliveryNote={note} />
           <DeleteButton id={id} lieferscheinNr={note.lieferschein_nr} />
         </div>
       </div>

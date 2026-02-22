@@ -196,22 +196,6 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
               </td>
             </tr>
           ))}
- 
-          {Array.from({ length: Math.max(0, (disabled ? 15 : 14) - items.length) }, (_, rowIdx) => {
-            const key = `empty-row-${items.length + rowIdx}`
-            return (
-              <tr key={key} className="print:block hidden">
-                <td className="border border-black px-2 py-2.5 text-xs">&nbsp;</td>
-                <td className="border border-black px-1 py-2.5" />
-                <td className="border border-black px-1 py-2.5" />
-                <td className="border border-black px-1 py-2.5" />
-                <td className="border border-black px-1 py-2.5" />
-                <td className="border border-black px-1 py-2.5" />
-                <td className="border border-black px-1 py-2.5" />
-                <td className="border border-black px-1 py-2.5" />
-              </tr>
-            )
-          })}
           <tr>
             <td colSpan={9} className="px-2 pb-2.5 text-xs text-center">
               <p className="mt-2 text-[10px]">Pflanzenpass: DE-HH1-110071</p>

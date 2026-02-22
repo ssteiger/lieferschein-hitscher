@@ -9,7 +9,7 @@ interface DeliveryNoteItem {
 }
 
 export interface PDFDownloadButtonProps {
-  note: {
+  deliveryNote: {
     lieferschein_nr: string | null
     bestellnummer: string | null
     delivery_date: string
@@ -45,13 +45,13 @@ function splitBestellnummer(nr: string | null): string[] {
   return chunks
 }
 
-async function downloadPdf(note: PDFDownloadButtonProps['note']) {
+async function downloadPdf(deliveryNote: PDFDownloadButtonProps['deliveryNote']) {
   const pdfMake = await import('pdfmake/build/pdfmake')
   await import('pdfmake/build/vfs_fonts')
 
   const logoBase64 = await loadImageAsBase64('/loest_logo.jpg')
 
-  const itemRows = note.items.map((item) => [
+  const itemRows = deliveryNote.items.map((item) => [
     { text: item.article_name, fontSize: 9, margin: [4, 6, 4, 6] as [number, number, number, number] },
     ...item.quantities.map((q) => ({
       text: q > 0 ? String(q) : '',
@@ -67,19 +67,6 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
       fontSize: 9,
       margin: [4, 6, 4, 6] as [number, number, number, number],
     },
-  ])
-
-  const minRows = 15
-  const emptyRowsNeeded = Math.max(0, minRows - note.items.length)
-  const emptyRows = Array.from({ length: emptyRowsNeeded }, () => [
-    { text: '', margin: [4, 6, 4, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: '', margin: [4, 6, 4, 6] as [number, number, number, number] },
   ])
 
   const docDefinition = {
@@ -192,7 +179,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                   {
                     columns: [
                       { text: 'Lieferschein Nr:', bold: true, fontSize: 10, width: 'auto' },
-                      { text: note.lieferschein_nr || '', fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
+                      { text: deliveryNote.lieferschein_nr || '', fontSize: 10, width: '*', decoration: 'underline' as const, margin: [4, 0, 0, 0] as [number, number, number, number] },
                     ],
                     margin: [4, 4, 4, 4] as [number, number, number, number],
                   },
@@ -219,7 +206,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                   {
                     columns: [
                       { text: 'Hamburg, den', bold: true, fontSize: 10, width: 'auto' },
-                      { text: formatDate(note.delivery_date), fontSize: 10, width: '*', margin: [4, 0, 0, 0] as [number, number, number, number] },
+                      { text: formatDate(deliveryNote.delivery_date), fontSize: 10, width: '*', margin: [4, 0, 0, 0] as [number, number, number, number] },
                     ],
                     margin: [4, 4, 4, 4] as [number, number, number, number],
                   },
@@ -279,7 +266,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
             // Header row 2: Bestellnummer split into 6 two-digit chunks
             [
               { text: 'Bestellnummer', bold: true, fontSize: 9, margin: [4, 8, 4, 4] as [number, number, number, number] },
-              ...splitBestellnummer(note.bestellnummer).map((chunk) => ({
+              ...splitBestellnummer(deliveryNote.bestellnummer).map((chunk) => ({
                 text: chunk,
                 bold: true,
                 fontSize: 20,
@@ -288,9 +275,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
               })),
               { text: 'Einzelpreis\nin \u20AC', bold: true, fontSize: 9, alignment: 'center' as const, margin: [2, 0, 2, 2] as [number, number, number, number], border: [true, false, true, true] },
             ],
-            // Data rows + empty padding rows
             ...itemRows,
-            ...emptyRows,
           ],
         },
         // 0.5pt thin borders for the item grid
@@ -304,16 +289,16 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
     ],
   }
 
-  const filename = note.lieferschein_nr
-    ? `Lieferschein-${note.lieferschein_nr}.pdf`
-    : `Lieferschein-${formatDate(note.delivery_date)}.pdf`
+  const filename = deliveryNote.lieferschein_nr
+    ? `Lieferschein-${deliveryNote.lieferschein_nr}.pdf`
+    : `Lieferschein-${formatDate(deliveryNote.delivery_date)}.pdf`
 
   pdfMake.default.createPdf(docDefinition).download(filename)
 }
 
-export function PDFDownloadButton({ note }: PDFDownloadButtonProps) {
+export function PDFDownloadButton({ deliveryNote }: PDFDownloadButtonProps) {
   return (
-    <Button variant="outline" size="lg" onClick={() => downloadPdf(note)}>
+    <Button variant="outline" size="lg" onClick={() => downloadPdf(deliveryNote)}>
       <DownloadIcon className="mr-2 h-4 w-4" />
       PDF herunterladen
     </Button>
