@@ -16,7 +16,7 @@ import { useReactToPrint } from 'react-to-print'
 interface DeliveryNoteItem {
   id?: string
   article_name: string
-  quantities: number[]
+  quantities: string[]
   unit_price_cents: number
 }
 
@@ -69,7 +69,7 @@ const updateDeliveryNote = createServerFn({ method: 'POST' })
       .where(eq(schema.delivery_note_items.delivery_note_id, data.id))
 
     const itemsWithData = data.items.filter(
-      (item) => item.quantities.some((q) => q > 0) || item.unit_price_cents > 0,
+      (item) => item.quantities.some((q) => q !== '') || item.unit_price_cents > 0,
     )
 
     if (itemsWithData.length > 0) {
@@ -161,7 +161,7 @@ function EditForm({
     },
   })
 
-  const updateItemQuantity = (index: number, chunkIndex: number, value: number) => {
+  const updateItemQuantity = (index: number, chunkIndex: number, value: string) => {
     setItems((prev) => {
       const updated = [...prev]
       const quantities = [...updated[index].quantities]
@@ -186,7 +186,7 @@ function EditForm({
   const setItemsByArticles = (articles: string[]) => {
     setItems((prev) => {
       const existing = new Map(prev.map((item) => [item.article_name, item]))
-      return articles.map((name) => existing.get(name) ?? { article_name: name, quantities: [0, 0, 0, 0, 0, 0], unit_price_cents: 0 })
+      return articles.map((name) => existing.get(name) ?? { article_name: name, quantities: ['', '', '', '', '', ''], unit_price_cents: 0 })
     })
   }
 

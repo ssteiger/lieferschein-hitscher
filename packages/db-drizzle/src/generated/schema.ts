@@ -15,7 +15,7 @@ export const delivery_note_items = pgTable("delivery_note_items", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	delivery_note_id: uuid().notNull(),
 	article_name: text().notNull(),
-	quantities: jsonb().$type<number[]>().default([0,0,0,0,0,0]).notNull(),
+	quantities: jsonb().$type<string[]>().default(['','','','','','']).notNull(),
 	unit_price_cents: integer().default(0).notNull(),
 	sort_order: integer().default(0).notNull(),
 }, (table) => {

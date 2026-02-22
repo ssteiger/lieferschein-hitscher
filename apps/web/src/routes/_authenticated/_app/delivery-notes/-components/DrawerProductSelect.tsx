@@ -44,11 +44,13 @@ interface ProductSelectDrawerProps {
 export function ProductSelectDrawer({ open, existingArticles, onSubmit, onClose }: ProductSelectDrawerProps) {
   const [selected, setSelected] = useState<string[]>([])
   const [customName, setCustomName] = useState('')
+  const [search, setSearch] = useState('')
 
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
       setSelected([...existingArticles])
       setCustomName('')
+      setSearch('')
     } else {
       onClose()
     }
@@ -77,6 +79,10 @@ export function ProductSelectDrawer({ open, existingArticles, onSubmit, onClose 
   }
 
   const selectedSet = new Set(selected)
+  const searchLower = search.toLowerCase()
+  const filteredArticles = search
+    ? DEFAULT_ARTICLES.filter((a) => a.toLowerCase().includes(searchLower))
+    : DEFAULT_ARTICLES
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
@@ -85,9 +91,17 @@ export function ProductSelectDrawer({ open, existingArticles, onSubmit, onClose 
           <DrawerHeader>
             <DrawerTitle>Artikel hinzufügen</DrawerTitle>
           </DrawerHeader>
+          <div className="px-4 pb-2">
+            <Input
+              placeholder="Suchen..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="mb-2"
+            />
+          </div>
           <div className="px-4 pb-2 max-h-[50vh] overflow-y-auto">
             <div className="space-y-1">
-              {DEFAULT_ARTICLES.map((article) => {
+              {filteredArticles.map((article) => {
                 const isSelected = selectedSet.has(article)
                 return (
                   <button

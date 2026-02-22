@@ -9,7 +9,7 @@ import { ProductSelectDrawer } from './DrawerProductSelect'
 
 export interface DeliveryNoteItem {
   article_name: string
-  quantities: number[]
+  quantities: string[]
   unit_price_cents: number
 }
 
@@ -22,7 +22,7 @@ interface LieferscheinFormProps {
   onDeliveryDateChange?: (value: string) => void
   items: DeliveryNoteItem[]
   onRemoveItem?: (index: number) => void
-  onUpdateItemQuantity?: (index: number, chunkIndex: number, value: number) => void
+  onUpdateItemQuantity?: (index: number, chunkIndex: number, value: string) => void
   onUpdateItemPrice?: (index: number, cents: number) => void
   onSetItems?: (articles: string[]) => void
   disabled?: boolean
@@ -175,11 +175,10 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
                   <td key={`q${chunkIdx}`} className={`border border-black px-0.5 py-0.5 ${chunkEmpty ? 'bg-muted' : ''}`}>
                     <Input
                       type="text"
-                      inputMode="numeric"
                       disabled={disabled || chunkEmpty}
                       className="h-7 w-full border-0 shadow-none text-center text-xs px-0 focus-visible:ring-0 disabled:opacity-40"
                       value={item.quantities[chunkIdx] || ''}
-                      onChange={(e) => onUpdateItemQuantity?.(index, chunkIdx, Number.parseInt(e.target.value) || 0)}
+                      onChange={(e) => onUpdateItemQuantity?.(index, chunkIdx, e.target.value)}
                     />
                   </td>
                 )

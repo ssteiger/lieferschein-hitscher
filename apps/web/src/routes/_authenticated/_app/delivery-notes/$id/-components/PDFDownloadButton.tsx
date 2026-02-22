@@ -4,7 +4,7 @@ import { DownloadIcon } from 'lucide-react'
 interface DeliveryNoteItem {
   id?: string
   article_name: string
-  quantities: number[]
+  quantities: string[]
   unit_price_cents: number
 }
 
@@ -54,7 +54,7 @@ async function downloadPdf(deliveryNote: PDFDownloadButtonProps['deliveryNote'])
   const itemRows = deliveryNote.items.map((item) => [
     { text: item.article_name, fontSize: 9, margin: [4, 6, 4, 6] as [number, number, number, number] },
     ...item.quantities.map((q) => ({
-      text: q > 0 ? String(q) : '',
+      text: q || '',
       alignment: 'center' as const,
       fontSize: 9,
       margin: [2, 6, 2, 6] as [number, number, number, number],

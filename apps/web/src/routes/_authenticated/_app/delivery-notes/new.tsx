@@ -35,7 +35,7 @@ const createDeliveryNote = createServerFn({ method: 'POST' })
       .returning()
 
     const itemsWithData = data.items.filter(
-      (item) => item.quantities.some((q) => q > 0) || item.unit_price_cents > 0,
+      (item) => item.quantities.some((q) => q !== '') || item.unit_price_cents > 0,
     )
 
     if (itemsWithData.length > 0) {
@@ -94,7 +94,7 @@ const NewDeliveryNotePage = () => {
     })
   }
 
-  const updateItemQuantity = (index: number, chunkIndex: number, value: number) => {
+  const updateItemQuantity = (index: number, chunkIndex: number, value: string) => {
     setItems((prev) => {
       const updated = [...prev]
       const quantities = [...updated[index].quantities]
@@ -119,7 +119,7 @@ const NewDeliveryNotePage = () => {
   const setItemsByArticles = (articles: string[]) => {
     setItems((prev) => {
       const existing = new Map(prev.map((item) => [item.article_name, item]))
-      return articles.map((name) => existing.get(name) ?? { article_name: name, quantities: [0, 0, 0, 0, 0, 0], unit_price_cents: 0 })
+      return articles.map((name) => existing.get(name) ?? { article_name: name, quantities: ['', '', '', '', '', ''], unit_price_cents: 0 })
     })
   }
 
