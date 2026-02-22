@@ -5,9 +5,9 @@ import type { Database } from '~/types/supabase'
 export function getSupabaseServerClient() {
   return createServerClient<Database>(
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    process.env.SUPABASE_URL!,
+    process.env.VITE_SUPABASE_URL!,
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    process.env.SUPABASE_ANON_KEY!,
+    process.env.VITE_SUPABASE_KEY!,
     {
       cookies: {
         getAll() {
