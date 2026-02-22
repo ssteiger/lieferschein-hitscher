@@ -98,6 +98,7 @@ export type Database = {
       }
       delivery_notes: {
         Row: {
+          bestellnummer: string | null
           created_at: string
           delivery_date: string
           id: string
@@ -106,6 +107,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bestellnummer?: string | null
           created_at?: string
           delivery_date?: string
           id?: string
@@ -114,6 +116,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bestellnummer?: string | null
           created_at?: string
           delivery_date?: string
           id?: string

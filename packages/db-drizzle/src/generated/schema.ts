@@ -1,9 +1,10 @@
-import { pgTable, uuid, text, date, timestamp, index, foreignKey, integer, unique, jsonb } from "drizzle-orm/pg-core"
+import { pgTable, uuid, text, varchar, date, timestamp, index, foreignKey, integer, unique, jsonb } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const delivery_notes = pgTable("delivery_notes", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	lieferschein_nr: text(),
+	bestellnummer: varchar({ length: 12 }),
 	delivery_date: date().default(sql`CURRENT_DATE`).notNull(),
 	notes: text(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),

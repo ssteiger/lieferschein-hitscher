@@ -13,6 +13,7 @@ interface DeliveryNoteItem {
 export interface PDFDownloadButtonProps {
   note: {
     lieferschein_nr: string | null
+    bestellnummer: string | null
     delivery_date: string
     notes: string | null
     items: DeliveryNoteItem[]
@@ -37,6 +38,15 @@ async function loadImageAsBase64(url: string): Promise<string> {
   })
 }
 
+function splitBestellnummer(nr: string | null): string[] {
+  const digits = (nr || '').replace(/\D/g, '').slice(0, 12)
+  const chunks: string[] = []
+  for (let i = 0; i < 12; i += 2) {
+    chunks.push(digits.slice(i, i + 2))
+  }
+  return chunks
+}
+
 async function downloadPdf(note: PDFDownloadButtonProps['note']) {
   const pdfMake = await import('pdfmake/build/pdfmake')
   await import('pdfmake/build/vfs_fonts')
@@ -45,9 +55,12 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
 
   const itemRows = note.items.map((item) => [
     { text: item.article_name, fontSize: 9, margin: [4, 6, 4, 6] as [number, number, number, number] },
-    { text: item.quantity_35 || '', alignment: 'center' as const, fontSize: 9, margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: item.quantity_65 || '', alignment: 'center' as const, fontSize: 9, margin: [2, 6, 2, 6] as [number, number, number, number] },
-    { text: item.quantity_85 || '', alignment: 'center' as const, fontSize: 9, margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
     {
       text: item.unit_price_cents > 0
         ? (item.unit_price_cents / 100).toFixed(2).replace('.', ',')
@@ -62,6 +75,9 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
   const emptyRowsNeeded = Math.max(0, minRows - note.items.length)
   const emptyRows = Array.from({ length: emptyRowsNeeded }, () => [
     { text: '', margin: [4, 6, 4, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
+    { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
     { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
     { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
     { text: '', margin: [2, 6, 2, 6] as [number, number, number, number] },
@@ -229,7 +245,7 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
       {
         table: {
           headerRows: 2,
-          widths: ['*', 45, 45, 45, 75],
+          widths: ['*', 30, 30, 30, 30, 30, 30, 75],
           body: [
             // Header row 1: column group labels
             [
@@ -244,10 +260,13 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                 text: 'Stück / VPE', 
                 bold: true, 
                 fontSize: 9,
-                colSpan: 3, 
+                colSpan: 6, 
                 alignment: 'center' as const,
                 margin: [2, 2, 2, 2] as [number, number, number, number] 
               },
+              {},
+              {},
+              {},
               {},
               {},
               { 
@@ -259,12 +278,16 @@ async function downloadPdf(note: PDFDownloadButtonProps['note']) {
                 border: [true, true, true, false],
               },
             ],
-            // Header row 2: pot size sub-columns (35/65/85)
+            // Header row 2: Bestellnummer split into 6 two-digit chunks
             [
               { text: 'Bestellnummer', bold: true, fontSize: 9, margin: [4, 4, 4, 4] as [number, number, number, number] },
-              { text: '35', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
-              { text: '65', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
-              { text: '85', bold: true, fontSize: 16, alignment: 'center' as const, margin: [2, 2, 2, 2] as [number, number, number, number] },
+              ...splitBestellnummer(note.bestellnummer).map((chunk) => ({
+                text: chunk,
+                bold: true,
+                fontSize: 16,
+                alignment: 'center' as const,
+                margin: [2, 2, 2, 2] as [number, number, number, number],
+              })),
               { text: 'Einzelpreis\nin \u20AC', bold: true, fontSize: 9, alignment: 'center' as const, margin: [2, 0, 2, 2] as [number, number, number, number], border: [true, false, true, true] },
             ],
             // Data rows + empty padding rows

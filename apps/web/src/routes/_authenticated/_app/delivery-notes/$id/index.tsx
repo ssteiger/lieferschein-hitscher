@@ -25,6 +25,7 @@ interface DeliveryNoteItem {
 interface UpdateDeliveryNoteInput {
   id: string
   lieferschein_nr: string
+  bestellnummer: string
   delivery_date: string
   notes: string
   items: DeliveryNoteItem[]
@@ -57,6 +58,7 @@ const updateDeliveryNote = createServerFn({ method: 'POST' })
       .update(schema.delivery_notes)
       .set({
         lieferschein_nr: data.lieferschein_nr || null,
+        bestellnummer: data.bestellnummer || null,
         delivery_date: data.delivery_date,
         notes: data.notes || null,
         updated_at: new Date().toISOString(),
@@ -128,7 +130,7 @@ function ReadOnlyView({
   onDelete,
   isDeleting,
 }: {
-  note: { lieferschein_nr: string | null; delivery_date: string; notes: string | null; items: DeliveryNoteItem[] }
+  note: { lieferschein_nr: string | null; bestellnummer: string | null; delivery_date: string; notes: string | null; items: DeliveryNoteItem[] }
   onEdit: () => void
   onDelete: () => void
   isDeleting: boolean
@@ -150,6 +152,12 @@ function ReadOnlyView({
               <p className="text-muted-foreground text-sm">Lieferschein Nr.</p>
               <p className="font-medium">{note.lieferschein_nr || '—'}</p>
             </div>
+            <div>
+              <p className="text-muted-foreground text-sm">Bestellnummer</p>
+              <p className="font-medium">{note.bestellnummer || '—'}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <p className="text-muted-foreground text-sm">Datum</p>
               <p className="font-medium">{formatDate(note.delivery_date)}</p>
@@ -233,12 +241,13 @@ function EditView({
   onCancel,
   isSaving,
 }: {
-  initialNote: { lieferschein_nr: string | null; delivery_date: string; notes: string | null; items: DeliveryNoteItem[] }
-  onSave: (data: { lieferschein_nr: string; delivery_date: string; notes: string; items: DeliveryNoteItem[] }) => void
+  initialNote: { lieferschein_nr: string | null; bestellnummer: string | null; delivery_date: string; notes: string | null; items: DeliveryNoteItem[] }
+  onSave: (data: { lieferschein_nr: string; bestellnummer: string; delivery_date: string; notes: string; items: DeliveryNoteItem[] }) => void
   onCancel: () => void
   isSaving: boolean
 }) {
   const [lieferscheinNr, setLieferscheinNr] = useState(initialNote.lieferschein_nr || '')
+  const [bestellnummer, setBestellnummer] = useState(initialNote.bestellnummer || '')
   const [deliveryDate, setDeliveryDate] = useState(initialNote.delivery_date)
   const [notes, setNotes] = useState(initialNote.notes || '')
   const [items, setItems] = useState<DeliveryNoteItem[]>(initialNote.items)
@@ -277,6 +286,22 @@ function EditView({
               <Label htmlFor="lieferschein_nr">Lieferschein Nr.</Label>
               <Input id="lieferschein_nr" placeholder="z.B. 2026-001" value={lieferscheinNr} onChange={(e) => setLieferscheinNr(e.target.value)} />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="bestellnummer">Bestellnummer</Label>
+              <Input
+                id="bestellnummer"
+                inputMode="numeric"
+                placeholder="Max. 12 Ziffern"
+                maxLength={12}
+                value={bestellnummer}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, '').slice(0, 12)
+                  setBestellnummer(v)
+                }}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="delivery_date">Datum</Label>
               <Input id="delivery_date" type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} />
@@ -366,7 +391,7 @@ function EditView({
         <Button
           className="flex-1"
           size="lg"
-          onClick={() => onSave({ lieferschein_nr: lieferscheinNr, delivery_date: deliveryDate, notes, items })}
+          onClick={() => onSave({ lieferschein_nr: lieferscheinNr, bestellnummer, delivery_date: deliveryDate, notes, items })}
           disabled={isSaving}
         >
           <SaveIcon className="mr-2 h-4 w-4" />

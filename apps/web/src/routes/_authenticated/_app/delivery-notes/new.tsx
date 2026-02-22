@@ -21,6 +21,7 @@ interface DeliveryNoteItem {
 
 interface CreateDeliveryNoteInput {
   lieferschein_nr: string
+  bestellnummer: string
   delivery_date: string
   notes: string
   items: DeliveryNoteItem[]
@@ -68,6 +69,7 @@ const createDeliveryNote = createServerFn({ method: 'POST' })
       .insert(schema.delivery_notes)
       .values({
         lieferschein_nr: data.lieferschein_nr || null,
+        bestellnummer: data.bestellnummer || null,
         delivery_date: data.delivery_date,
         notes: data.notes || null,
       })
@@ -100,6 +102,7 @@ const NewDeliveryNotePage = () => {
 
   const today = new Date().toISOString().split('T')[0]
   const [lieferscheinNr, setLieferscheinNr] = useState('')
+  const [bestellnummer, setBestellnummer] = useState('')
   const [deliveryDate, setDeliveryDate] = useState(today)
   const [notes, setNotes] = useState('')
   const [items, setItems] = useState<DeliveryNoteItem[]>([])
@@ -144,6 +147,7 @@ const NewDeliveryNotePage = () => {
   const handleSubmit = () => {
     mutation.mutate({
       lieferschein_nr: lieferscheinNr,
+      bestellnummer,
       delivery_date: deliveryDate,
       notes,
       items,
@@ -214,6 +218,22 @@ const NewDeliveryNotePage = () => {
                   onChange={(e) => setLieferscheinNr(e.target.value)}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="bestellnummer">Bestellnummer</Label>
+                <Input
+                  id="bestellnummer"
+                  inputMode="numeric"
+                  placeholder="Max. 12 Ziffern"
+                  maxLength={12}
+                  value={bestellnummer}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, '').slice(0, 12)
+                    setBestellnummer(v)
+                  }}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="delivery_date">Datum</Label>
                 <Input
