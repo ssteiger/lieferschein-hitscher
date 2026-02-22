@@ -1,6 +1,7 @@
 import {
   BellIcon,
   DatabaseIcon,
+  FingerprintIcon,
   LogOutIcon,
   MoreVerticalIcon,
 } from 'lucide-react'
@@ -37,6 +38,19 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
+
+  const addPasskeyMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await authClient.passkey.addPasskey()
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => {
+      toast.success('Passkey added successfully')
+    },
+    onError: (error) => {
+      toast.error(`Failed to add passkey: ${error.message}`)
+    },
+  })
 
   const logOutMutation = useMutation({
     mutationFn: async () => {
@@ -92,6 +106,10 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => addPasskeyMutation.mutate()} disabled={addPasskeyMutation.isPending}>
+                <FingerprintIcon />
+                {addPasskeyMutation.isPending ? 'Adding Passkey ...' : 'Add Passkey'}
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <BellIcon />
                 Notifications
