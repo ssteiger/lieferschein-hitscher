@@ -1,9 +1,8 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { postgres_db, schema, eq, asc } from '@lieferschein-hitscher/db-drizzle'
 import { Button } from '~/lib/components/ui/button'
-import { Skeleton } from '~/lib/components/ui/skeleton'
 import { useRef } from 'react'
 import { ArrowLeftIcon, PencilIcon, PrinterIcon } from 'lucide-react'
 import { PDFDownloadButton } from './-components/PDFDownloadButton'
@@ -31,49 +30,22 @@ const getDeliveryNote = createServerFn({ method: 'GET' })
     return { ...note, items }
   })
 
+const deliveryNoteQueryOptions = (id: string) => ({
+  queryKey: ['delivery-note', id],
+  queryFn: () => getDeliveryNote({ data: { id } }),
+})
+
 const DeliveryNoteDetailPage = () => {
   const { id } = Route.useParams()
   const navigate = useNavigate()
   const formRef = useRef<HTMLDivElement>(null)
 
-  const { data: note, isLoading } = useQuery({
-    queryKey: ['delivery-note', id],
-    queryFn: () => getDeliveryNote({ data: { id } }),
-  })
+  const { data: note } = useSuspenseQuery(deliveryNoteQueryOptions(id))
 
   const handlePrint = useReactToPrint({
     contentRef: formRef,
-    documentTitle: note?.lieferschein_nr ? `Lieferschein-${note.lieferschein_nr}` : 'Lieferschein',
+    documentTitle: note.lieferschein_nr ? `Lieferschein-${note.lieferschein_nr}` : 'Lieferschein',
   })
-
-  if (isLoading) {
-    return (
-      <div className="flex-1 p-4 pb-24">
-        <div className="mx-auto max-w-3xl space-y-6">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-10 w-10" />
-            <Skeleton className="h-8 w-48" />
-          </div>
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-      </div>
-    )
-  }
-
-  if (!note) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
-        <p className="text-lg font-medium">Lieferschein nicht gefunden</p>
-        <Link to="/delivery-notes/overview">
-          <Button variant="outline">
-            <ArrowLeftIcon className="mr-2 h-4 w-4" />
-            Zurück zur Übersicht
-          </Button>
-        </Link>
-      </div>
-    )
-  }
 
   return (
     <div className="flex-1 p-4 pb-24">
@@ -121,5 +93,7 @@ const DeliveryNoteDetailPage = () => {
 }
 
 export const Route = createFileRoute('/_authenticated/_app/delivery-notes/$id/')({
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(deliveryNoteQueryOptions(params.id)),
   component: DeliveryNoteDetailPage,
 })

@@ -11,7 +11,7 @@ export function createRouter() {
     defaultOptions: {
       queries: {
         refetchOnWindowFocus: false,
-        //staleTime: 1000 * 60, // 1 minute
+        staleTime: 1000 * 30,
       },
     },
   })
@@ -20,7 +20,7 @@ export function createRouter() {
     createTanStackRouter({
       routeTree,
       context: { queryClient, user: null },
-      defaultPreload: 'intent',
+      defaultPreload: 'viewport',
       // react-query will handle data fetching & caching
       // https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#passing-all-loader-events-to-an-external-cache
       defaultPreloadStaleTime: 0,

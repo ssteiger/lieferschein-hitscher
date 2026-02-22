@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { DataTable } from '~/lib/components/ui/data-table'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -27,6 +27,11 @@ const getDeliveryNotes = createServerFn({ method: 'GET' }).handler(async () => {
     .limit(500)
   return notes
 })
+
+const deliveryNotesQueryOptions = {
+  queryKey: ['delivery-notes'],
+  queryFn: () => getDeliveryNotes(),
+} as const
 
 const columns: ColumnDef<DeliveryNote>[] = [
   {
@@ -106,14 +111,7 @@ function DeliveryNoteCard({ note }: { note: DeliveryNote }) {
 
 const DeliveryNotesPage = () => {
   const [view, setView] = useState<'list' | 'grid'>('grid')
-  const {
-    data: deliveryNotes,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['delivery-notes'],
-    queryFn: () => getDeliveryNotes(),
-  })
+  const { data: deliveryNotes, refetch } = useSuspenseQuery(deliveryNotesQueryOptions)
 
   return (
     <div className="flex-1 space-y-4 p-4">
@@ -139,9 +137,9 @@ const DeliveryNotesPage = () => {
 
       {view === 'list' ? (
         <DataTable
-          data={deliveryNotes || []}
+          data={deliveryNotes}
           columns={columns}
-          isLoading={isLoading}
+          isLoading={false}
           refetch={refetch}
           showSelectColumn={false}
           emptyState={{
@@ -151,18 +149,7 @@ const DeliveryNotesPage = () => {
         />
       ) : (
         <>
-          {isLoading ? (
-            <div className="mx-auto max-w-3xl space-y-4">
-              {['a', 'b', 'c'].map((key) => (
-                <Card key={key} className="animate-pulse">
-                  <CardHeader>
-                    <div className="bg-muted h-4 w-24 rounded" />
-                    <div className="bg-muted h-3 w-16 rounded" />
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-          ) : deliveryNotes?.length ? (
+          {deliveryNotes.length ? (
             <div className="mx-auto max-w-3xl space-y-4">
               {deliveryNotes.map((note) => (
                 <DeliveryNoteCard key={note.id} note={note} />
@@ -181,5 +168,7 @@ const DeliveryNotesPage = () => {
 }
 
 export const Route = createFileRoute('/_authenticated/_app/delivery-notes/overview')({
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(deliveryNotesQueryOptions),
   component: DeliveryNotesPage,
 })

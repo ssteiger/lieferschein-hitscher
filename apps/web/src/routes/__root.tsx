@@ -17,9 +17,10 @@ export const Route = createRootRouteWithContext<{
   user: Awaited<ReturnType<typeof getSession>>
 }>()({
   beforeLoad: async ({ context }) => {
-    const session = await context.queryClient.fetchQuery({
+    const session = await context.queryClient.ensureQueryData({
       queryKey: ['session'],
       queryFn: () => getSession(),
+      staleTime: 1000 * 60 * 5,
     })
     return { user: session }
   },

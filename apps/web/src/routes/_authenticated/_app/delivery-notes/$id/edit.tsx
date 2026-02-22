@@ -1,10 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { postgres_db, schema, eq, asc } from '@lieferschein-hitscher/db-drizzle'
 import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
-import { Skeleton } from '~/lib/components/ui/skeleton'
 import { toast } from 'sonner'
 import { useRef, useState } from 'react'
 import { ArrowLeftIcon, SaveIcon, PrinterIcon } from 'lucide-react'
@@ -49,6 +48,11 @@ const getDeliveryNote = createServerFn({ method: 'GET' })
     return { ...note, items }
   })
 
+const deliveryNoteQueryOptions = (id: string) => ({
+  queryKey: ['delivery-note', id],
+  queryFn: () => getDeliveryNote({ data: { id } }),
+})
+
 const updateDeliveryNote = createServerFn({ method: 'POST' })
   .validator((input: UpdateDeliveryNoteInput) => input)
   .handler(async ({ data }) => {
@@ -89,39 +93,8 @@ const updateDeliveryNote = createServerFn({ method: 'POST' })
 
 const EditDeliveryNotePage = () => {
   const { id } = Route.useParams()
-  const navigate = useNavigate()
 
-  const { data: note, isLoading } = useQuery({
-    queryKey: ['delivery-note', id],
-    queryFn: () => getDeliveryNote({ data: { id } }),
-  })
-
-  if (isLoading) {
-    return (
-      <div className="flex-1 p-4 pb-24">
-        <div className="mx-auto max-w-3xl space-y-6">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-10 w-10" />
-            <Skeleton className="h-8 w-48" />
-          </div>
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-      </div>
-    )
-  }
-
-  if (!note) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
-        <p className="text-lg font-medium">Lieferschein nicht gefunden</p>
-        <Button variant="outline" onClick={() => navigate({ to: '/delivery-notes/overview' })}>
-          <ArrowLeftIcon className="mr-2 h-4 w-4" />
-          Zurück zur Übersicht
-        </Button>
-      </div>
-    )
-  }
+  const { data: note } = useSuspenseQuery(deliveryNoteQueryOptions(id))
 
   return <EditForm noteId={id} initialNote={note} />
 }
@@ -271,5 +244,7 @@ function EditForm({
 }
 
 export const Route = createFileRoute('/_authenticated/_app/delivery-notes/$id/edit')({
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(deliveryNoteQueryOptions(params.id)),
   component: EditDeliveryNotePage,
 })

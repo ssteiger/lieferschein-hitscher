@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { postgres_db, schema, eq } from '@lieferschein-hitscher/db-drizzle'
 import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
@@ -52,6 +52,11 @@ const getSettings = createServerFn({ method: 'GET' }).handler(async () => {
   return settings
 })
 
+const settingsQueryOptions = {
+  queryKey: ['settings'],
+  queryFn: () => getSettings(),
+} as const
+
 const saveSettings = createServerFn({ method: 'POST' })
   .validator((input: AllSettings) => input)
   .handler(async ({ data }) => {
@@ -84,10 +89,7 @@ const saveSettings = createServerFn({ method: 'POST' })
 const SettingsPage = () => {
   const queryClient = useQueryClient()
 
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ['settings'],
-    queryFn: () => getSettings(),
-  })
+  const { data: settings } = useSuspenseQuery(settingsQueryOptions)
 
   const [supplier, setSupplier] = useState<SupplierInfo>({
     name: '',
@@ -147,14 +149,6 @@ const SettingsPage = () => {
       updated[index] = value
       return updated
     })
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex-1 p-4">
-        <p className="text-muted-foreground">Laden...</p>
-      </div>
-    )
   }
 
   return (
@@ -289,5 +283,7 @@ const SettingsPage = () => {
 }
 
 export const Route = createFileRoute('/_authenticated/_app/settings/')({
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(settingsQueryOptions),
   component: SettingsPage,
 })
