@@ -150,7 +150,7 @@ const DeliveryNotesPage = () => {
       ) : (
         <>
           {deliveryNotes.length ? (
-            <div className="mx-auto max-w-3xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 space-y-2">
+            <div className="mx-auto max-w-3xl grid grid-cols-1 gap-2 space-y-2">
               {deliveryNotes.map((note) => (
                 <DeliveryNoteCard key={note.id} note={note} />
               ))}
