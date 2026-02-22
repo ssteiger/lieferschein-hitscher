@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
-import { Trash2Icon } from 'lucide-react'
+import { PlusIcon, Trash2Icon } from 'lucide-react'
 import { PriceDrawer } from './DrawerPrice'
 import { LieferscheinNrDrawer } from './DrawerLieferscheinNr'
 import { DateDrawer } from './DrawerDate'
+import { ProductSelectDrawer } from './DrawerProductSelect'
 
 export interface DeliveryNoteItem {
   article_name: string
@@ -23,6 +24,7 @@ interface LieferscheinFormProps {
   onRemoveItem?: (index: number) => void
   onUpdateItemQuantity?: (index: number, chunkIndex: number, value: number) => void
   onUpdateItemPrice?: (index: number, cents: number) => void
+  onAddItem?: (articleName: string) => void
   disabled?: boolean
 }
 
@@ -40,11 +42,12 @@ function formatPrice(cents: number) {
   return (cents / 100).toFixed(2)
 }
 
-export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr, onLieferscheinNrChange, bestellnummer, onBestellnummerChange, deliveryDate, onDeliveryDateChange, items, onRemoveItem, onUpdateItemQuantity, onUpdateItemPrice, disabled = false }: LieferscheinFormProps & { ref?: React.RefObject<HTMLDivElement | null> }) {
+export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr, onLieferscheinNrChange, bestellnummer, onBestellnummerChange, deliveryDate, onDeliveryDateChange, items, onRemoveItem, onUpdateItemQuantity, onUpdateItemPrice, onAddItem, disabled = false }: LieferscheinFormProps & { ref?: React.RefObject<HTMLDivElement | null> }) {
   const bestellChunks = splitBestellnummer(bestellnummer)
   const [priceEditIndex, setPriceEditIndex] = useState<number | null>(null)
   const [lieferscheinNrDrawerOpen, setLieferscheinNrDrawerOpen] = useState(false)
   const [dateDrawerOpen, setDateDrawerOpen] = useState(false)
+  const [productDrawerOpen, setProductDrawerOpen] = useState(false)
 
   const handleChunkChange = (index: number, value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 2)
@@ -193,10 +196,11 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
               </td>
             </tr>
           ))}
-          {Array.from({ length: Math.max(0, 15 - items.length) }, (_, rowIdx) => {
+ 
+          {Array.from({ length: Math.max(0, (disabled ? 15 : 14) - items.length) }, (_, rowIdx) => {
             const key = `empty-row-${items.length + rowIdx}`
             return (
-              <tr key={key}>
+              <tr key={key} className="print:block hidden">
                 <td className="border border-black px-2 py-2.5 text-xs">&nbsp;</td>
                 <td className="border border-black px-1 py-2.5" />
                 <td className="border border-black px-1 py-2.5" />
@@ -215,6 +219,18 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
           </tr>
         </tbody>
       </table>
+
+      {!disabled && onAddItem && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setProductDrawerOpen(true)}
+          className="print:hidden w-full" size="lg"
+        >
+          <PlusIcon className="h-3.5 w-3.5" />
+          Artikel hinzufügen
+        </Button>
+      )}
 
       {!disabled && (
         <>
@@ -247,6 +263,15 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
               setPriceEditIndex(null)
             }}
             onClose={() => setPriceEditIndex(null)}
+          />
+
+          <ProductSelectDrawer
+            open={productDrawerOpen}
+            existingArticles={items.map((item) => item.article_name)}
+            onSelect={(name) => {
+              onAddItem?.(name)
+            }}
+            onClose={() => setProductDrawerOpen(false)}
           />
         </>
       )}

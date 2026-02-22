@@ -1,22 +1,17 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { postgres_db, schema, eq } from '@lieferschein-hitscher/db-drizzle'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { postgres_db, schema } from '@lieferschein-hitscher/db-drizzle'
 import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
 import { toast } from 'sonner'
 import { useRef, useState } from 'react'
-import { ArrowLeftIcon, SaveIcon, PlusIcon, PrinterIcon } from 'lucide-react'
+import { ArrowLeftIcon, SaveIcon, PrinterIcon } from 'lucide-react'
 import { LieferscheinForm } from './-components/LieferscheinForm'
+import type { DeliveryNoteItem } from './-components/LieferscheinForm'
 import { PDFDownloadButton } from './$id/-components/PDFDownloadButton'
 import { SaveDrawer } from './-components/DrawerSave'
 import { useReactToPrint } from 'react-to-print'
-
-interface DeliveryNoteItem {
-  article_name: string
-  quantities: number[]
-  unit_price_cents: number
-}
 
 interface CreateDeliveryNoteInput {
   lieferschein_nr: string
@@ -25,41 +20,6 @@ interface CreateDeliveryNoteInput {
   notes: string
   items: DeliveryNoteItem[]
 }
-
-const getDefaultArticles = createServerFn({ method: 'GET' }).handler(async () => {
-  const result = await postgres_db
-    .select()
-    .from(schema.app_settings)
-    .where(eq(schema.app_settings.setting_key, 'default_articles'))
-    .limit(1)
-
-  if (result.length > 0) {
-    return result[0].setting_value as string[]
-  }
-  return [
-    'Viola F1 WP T9',
-    'Viola F1 ausgetopft',
-    'Hornveilchen WP T9',
-    'Hornveilchen ausgetopft',
-    'Million Bells T12',
-    'Million Bells Trio T12',
-    'Heliotrop T12',
-    'Diaskia T12',
-    'Bacopa T12',
-    'Diamond Frost T12',
-    'Sanvitalia T12',
-    'Nemesia T12',
-    'Tapien T12',
-    'Lobelia Richardii T12',
-    'Euphorbia T12',
-    'Tapien Trio T12',
-    'Zonale T12',
-    'Peltaten T12',
-    'Lantanen T12',
-    'Verbenen T12',
-    'Neu Guinea Imp. T12',
-  ]
-})
 
 const createDeliveryNote = createServerFn({ method: 'POST' })
   .validator((input: CreateDeliveryNoteInput) => input)
@@ -105,7 +65,6 @@ const NewDeliveryNotePage = () => {
   const [deliveryDate, setDeliveryDate] = useState(today)
   const [notes, setNotes] = useState('')
   const [items, setItems] = useState<DeliveryNoteItem[]>([])
-  const [customArticle, setCustomArticle] = useState('')
   const [saveDrawerOpen, setSaveDrawerOpen] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
 
@@ -113,28 +72,6 @@ const NewDeliveryNotePage = () => {
     contentRef: formRef,
     documentTitle: lieferscheinNr ? `Lieferschein-${lieferscheinNr}` : 'Lieferschein',
   })
-
-  const { data: defaultArticles } = useQuery({
-    queryKey: ['default-articles'],
-    queryFn: () => getDefaultArticles(),
-  })
-
-  const initializeItems = () => {
-    if (defaultArticles && items.length === 0) {
-      setItems(
-        defaultArticles.map((name) => ({
-          article_name: name,
-          quantities: [0, 0, 0, 0, 0, 0],
-          unit_price_cents: 0,
-        })),
-      )
-    }
-  }
-
-  console.log('defaultArticles', defaultArticles)
-  if (defaultArticles && items.length === 0) {
-    initializeItems()
-  }
 
   const mutation = useMutation({
     mutationFn: (data: CreateDeliveryNoteInput) => createDeliveryNote({ data }),
@@ -157,14 +94,6 @@ const NewDeliveryNotePage = () => {
     })
   }
 
-  const updateItem = (index: number, field: keyof DeliveryNoteItem, value: string | number) => {
-    setItems((prev) => {
-      const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
-      return updated
-    })
-  }
-
   const updateItemQuantity = (index: number, chunkIndex: number, value: number) => {
     setItems((prev) => {
       const updated = [...prev]
@@ -175,21 +104,23 @@ const NewDeliveryNotePage = () => {
     })
   }
 
+  const updateItemPrice = (index: number, cents: number) => {
+    setItems((prev) => {
+      const updated = [...prev]
+      updated[index] = { ...updated[index], unit_price_cents: cents }
+      return updated
+    })
+  }
+
   const removeItem = (index: number) => {
     setItems((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const addCustomArticle = () => {
-    if (!customArticle.trim()) return
+  const addItem = (articleName: string) => {
     setItems((prev) => [
       ...prev,
-      {
-        article_name: customArticle.trim(),
-        quantities: [0, 0, 0, 0, 0, 0],
-        unit_price_cents: 0,
-      },
+      { article_name: articleName, quantities: [0, 0, 0, 0, 0, 0], unit_price_cents: 0 },
     ])
-    setCustomArticle('')
   }
 
   return (
@@ -213,23 +144,10 @@ const NewDeliveryNotePage = () => {
           items={items}
           onRemoveItem={removeItem}
           onUpdateItemQuantity={updateItemQuantity}
-          onUpdateItemPrice={(index, cents) => updateItem(index, 'unit_price_cents', cents)}
+          onUpdateItemPrice={updateItemPrice}
+          onAddItem={addItem}
         />
 
-        {/* Add custom article */}
-        <div className="flex gap-2">
-          <Input
-            placeholder="Neuen Artikel hinzufügen..."
-            value={customArticle}
-            onChange={(e) => setCustomArticle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addCustomArticle()}
-          />
-          <Button variant="outline" size="icon" onClick={addCustomArticle}>
-            <PlusIcon className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Notes */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium whitespace-nowrap">Notizen:</span>
           <Input

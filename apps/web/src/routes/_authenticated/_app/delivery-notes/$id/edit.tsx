@@ -7,7 +7,7 @@ import { Input } from '~/lib/components/ui/input'
 import { Skeleton } from '~/lib/components/ui/skeleton'
 import { toast } from 'sonner'
 import { useRef, useState } from 'react'
-import { ArrowLeftIcon, SaveIcon, PlusIcon, PrinterIcon } from 'lucide-react'
+import { ArrowLeftIcon, SaveIcon, PrinterIcon } from 'lucide-react'
 import { LieferscheinForm } from '../-components/LieferscheinForm'
 import { PDFDownloadButton } from './-components/PDFDownloadButton'
 import { SaveDrawer } from '../-components/DrawerSave'
@@ -141,7 +141,6 @@ function EditForm({
   const [deliveryDate, setDeliveryDate] = useState(initialNote.delivery_date)
   const [notes, setNotes] = useState(initialNote.notes || '')
   const [items, setItems] = useState<DeliveryNoteItem[]>(initialNote.items)
-  const [customArticle, setCustomArticle] = useState('')
   const [saveDrawerOpen, setSaveDrawerOpen] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
 
@@ -184,13 +183,11 @@ function EditForm({
     setItems((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const addCustomArticle = () => {
-    if (!customArticle.trim()) return
+  const addItem = (articleName: string) => {
     setItems((prev) => [
       ...prev,
-      { article_name: customArticle.trim(), quantities: [0, 0, 0, 0, 0, 0], unit_price_cents: 0 },
+      { article_name: articleName, quantities: [0, 0, 0, 0, 0, 0], unit_price_cents: 0 },
     ])
-    setCustomArticle('')
   }
 
   const handleSubmit = () => {
@@ -228,19 +225,8 @@ function EditForm({
           onRemoveItem={removeItem}
           onUpdateItemQuantity={updateItemQuantity}
           onUpdateItemPrice={updateItemPrice}
+          onAddItem={addItem}
         />
-
-        <div className="flex gap-2">
-          <Input
-            placeholder="Neuen Artikel hinzufügen..."
-            value={customArticle}
-            onChange={(e) => setCustomArticle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addCustomArticle()}
-          />
-          <Button variant="outline" size="icon" onClick={addCustomArticle}>
-            <PlusIcon className="h-4 w-4" />
-          </Button>
-        </div>
 
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium whitespace-nowrap">Notizen:</span>
