@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '~/lib/components/ui/button'
 import { Input } from '~/lib/components/ui/input'
 import { CheckIcon, PlusIcon } from 'lucide-react'
@@ -34,6 +34,8 @@ const DEFAULT_ARTICLES = [
   'Neu Guinea Imp. T12',
 ] as const
 
+const DEFAULT_ARTICLE_SET = new Set<string>(DEFAULT_ARTICLES)
+
 interface ProductSelectDrawerProps {
   open: boolean
   existingArticles: string[]
@@ -45,15 +47,19 @@ export function ProductSelectDrawer({ open, existingArticles, onSubmit, onClose 
   const [selected, setSelected] = useState<string[]>([])
   const [customName, setCustomName] = useState('')
   const [search, setSearch] = useState('')
+  const [prevOpen, setPrevOpen] = useState(false)
+
+  if (open && !prevOpen) {
+    setSelected([...existingArticles])
+    setCustomName('')
+    setSearch('')
+  }
+  if (open !== prevOpen) {
+    setPrevOpen(open)
+  }
 
   const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen) {
-      setSelected([...existingArticles])
-      setCustomName('')
-      setSearch('')
-    } else {
-      onClose()
-    }
+    if (!isOpen) onClose()
   }
 
   const toggle = (article: string) => {
@@ -74,22 +80,26 @@ export function ProductSelectDrawer({ open, existingArticles, onSubmit, onClose 
     onClose()
   }
 
-  const handleCancel = () => {
-    onClose()
-  }
-
   const selectedSet = new Set(selected)
+  const customArticles = useMemo(
+    () => selected.filter((a) => !DEFAULT_ARTICLE_SET.has(a)),
+    [selected],
+  )
+
   const searchLower = search.toLowerCase()
-  const filteredArticles = search
+  const filteredDefaults = search
     ? DEFAULT_ARTICLES.filter((a) => a.toLowerCase().includes(searchLower))
     : DEFAULT_ARTICLES
+  const filteredCustom = search
+    ? customArticles.filter((a) => a.toLowerCase().includes(searchLower))
+    : customArticles
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <DrawerTitle>Artikel hinzufügen</DrawerTitle>
+            <DrawerTitle>Artikel auswählen</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-2">
             <Input
@@ -101,7 +111,23 @@ export function ProductSelectDrawer({ open, existingArticles, onSubmit, onClose 
           </div>
           <div className="px-4 pb-2 max-h-[50vh] overflow-y-auto">
             <div className="space-y-1">
-              {filteredArticles.map((article) => {
+              {filteredCustom.length > 0 && (
+                <>
+                  {filteredCustom.map((article) => (
+                    <button
+                      key={article}
+                      type="button"
+                      className="flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition-colors bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                      onClick={() => toggle(article)}
+                    >
+                      <span>{article}</span>
+                      <CheckIcon className="h-4 w-4" />
+                    </button>
+                  ))}
+                  <div className="border-b my-1" />
+                </>
+              )}
+              {filteredDefaults.map((article) => {
                 const isSelected = selectedSet.has(article)
                 return (
                   <button
@@ -130,7 +156,7 @@ export function ProductSelectDrawer({ open, existingArticles, onSubmit, onClose 
           </div>
           <DrawerFooter>
             <Button onClick={handleSubmit}>Übernehmen</Button>
-            <Button variant="outline" onClick={handleCancel}>Abbrechen</Button>
+            <Button variant="outline" onClick={onClose}>Abbrechen</Button>
           </DrawerFooter>
         </div>
       </DrawerContent>

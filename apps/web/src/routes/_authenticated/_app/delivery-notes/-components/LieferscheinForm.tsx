@@ -207,7 +207,7 @@ export const LieferscheinForm = function LieferscheinForm({ ref, lieferscheinNr,
           className="print:hidden w-full" size="lg"
         >
           <PlusIcon className="h-3.5 w-3.5" />
-          Artikel hinzufügen
+          Artikel auswählen
         </Button>
       )}
 
