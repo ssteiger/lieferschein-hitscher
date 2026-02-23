@@ -114,7 +114,7 @@ const DeliveryNotesPage = () => {
   const { data: deliveryNotes, refetch } = useSuspenseQuery(deliveryNotesQueryOptions)
 
   return (
-    <div className="flex-1 space-y-4 p-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-4 p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-normal">Lieferscheine</h2>
         <div className="flex items-center gap-2">
@@ -149,9 +149,9 @@ const DeliveryNotesPage = () => {
           }}
         />
       ) : (
-        <>
+        <div className="flex-1 overflow-auto min-h-0">
           {deliveryNotes.length ? (
-            <div className="mx-auto max-w-3xl grid grid-cols-1 gap-2 space-y-2">
+            <div className="mx-auto max-w-3xl grid grid-cols-1 gap-2 pb-4">
               {deliveryNotes.map((note) => (
                 <DeliveryNoteCard key={note.id} note={note} />
               ))}
@@ -162,7 +162,7 @@ const DeliveryNotesPage = () => {
               <p className="text-muted-foreground text-sm">Erstellen Sie Ihren ersten Lieferschein.</p>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   )

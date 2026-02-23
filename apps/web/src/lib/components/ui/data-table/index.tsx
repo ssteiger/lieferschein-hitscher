@@ -233,17 +233,12 @@ export function DataTable<TData>({
     },
   })
 
-  console.log({ data })
-  console.log({ table })
-
-  console.log({ pageCount: table.getPageCount() })
-
   // Add state for the selected row
   const [selectedRow, setSelectedRow] = React.useState<TData | null>(null)
 
   return (
-    <div className="w-full">
-      <div className="flex items-center py-4">
+    <div className="flex w-full flex-1 flex-col min-h-0">
+      <div className="flex shrink-0 items-center py-4">
         {searchableColumns.length > 0 && (
           <div className="flex items-center gap-2 max-w-sm">
             {searchableColumns.length > 1 && (
@@ -311,7 +306,7 @@ export function DataTable<TData>({
           </DropdownMenu>
         </div>
       </div>
-      <div className="overflow-hidden">
+      <div className="flex-1 overflow-auto min-h-0 rounded-md border">
         <Table>
           <TableHeader className="sticky top-0 z-10 bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -367,7 +362,7 @@ export function DataTable<TData>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between py-4 space-x-2">
+      <div className="flex shrink-0 items-center justify-between border-t bg-background py-3 space-x-2">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} row(s) selected.
