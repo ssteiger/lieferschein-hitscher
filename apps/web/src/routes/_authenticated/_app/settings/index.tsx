@@ -152,7 +152,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <div className="flex-1 p-4 pb-24">
+    <div className="flex-1 overflow-auto p-4 pb-24">
       <div className="mx-auto max-w-2xl space-y-6">
         <div>
           <h2 className="text-2xl">Einstellungen</h2>

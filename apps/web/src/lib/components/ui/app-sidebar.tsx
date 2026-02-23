@@ -55,19 +55,19 @@ export function AppSidebar({ variant = 'inset' }: AppSidebarProps) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
               <Link to="/delivery-notes/overview">
                 <span className="text-base font-semibold">Lieferschein Hitscher</span>
               </Link>
             </SidebarMenuButton>
+            <div className="mt-auto flex justify-center">
+              <img src="/hitscher_logo.png" alt="Gartenbau Hitscher" className="h-[70%] w-auto" />
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <div className="mt-auto flex justify-center">
-          <img src="/hitscher_logo.png" alt="Gartenbau Hitscher" className="h-[70%] w-auto" />
-        </div>
         <NavSecondary items={data.navSecondary} />
       </SidebarContent>
       <SidebarFooter>

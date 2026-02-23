@@ -124,7 +124,7 @@ const NewDeliveryNotePage = () => {
   }
 
   return (
-    <div className="flex-1 p-4 pb-24">
+    <div className="flex-1 overflow-auto p-4 pb-24">
       <div className="mx-auto max-w-3xl space-y-3">
         <div className="flex items-center gap-3 mb-2">
           <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/delivery-notes/overview' })}>
