@@ -181,7 +181,7 @@ function EditForm({
           <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/delivery-notes/$id', params: { id: noteId } })}>
             <ArrowLeftIcon className="h-5 w-5" />
           </Button>
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl">
             {lieferscheinNr || 'Lieferschein'} bearbeiten
           </h2>
         </div>

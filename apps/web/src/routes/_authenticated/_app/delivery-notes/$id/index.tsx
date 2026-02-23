@@ -54,7 +54,7 @@ const DeliveryNoteDetailPage = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/delivery-notes/overview' })}>
             <ArrowLeftIcon className="h-5 w-5" />
           </Button>
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl">
             {note.lieferschein_nr || 'Lieferschein'}
           </h2>
         </div>

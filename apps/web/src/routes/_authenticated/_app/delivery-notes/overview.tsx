@@ -115,8 +115,8 @@ const DeliveryNotesPage = () => {
 
   return (
     <div className="flex-1 space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Lieferscheine</h2>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-2xl font-normal">Lieferscheine</h2>
         <div className="flex items-center gap-2">
           <ToggleGroup type="single" value={view} onValueChange={(v) => v && setView(v as 'list' | 'grid')} variant="outline" size="sm">
             <ToggleGroupItem value="list" aria-label="Listenansicht">
@@ -142,6 +142,7 @@ const DeliveryNotesPage = () => {
           isLoading={false}
           refetch={refetch}
           showSelectColumn={false}
+          getRowLink={(item) => `/delivery-notes/${item.id}`}
           emptyState={{
             title: 'Keine Lieferscheine',
             subtitle: 'Erstellen Sie Ihren ersten Lieferschein.',

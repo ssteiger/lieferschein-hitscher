@@ -155,7 +155,7 @@ const SettingsPage = () => {
     <div className="flex-1 p-4 pb-24">
       <div className="mx-auto max-w-2xl space-y-6">
         <div>
-          <h2 className="text-2xl font-bold">Einstellungen</h2>
+          <h2 className="text-2xl">Einstellungen</h2>
           <p className="text-muted-foreground">
             Lieferant, Warenempfänger und Standard-Artikel verwalten.
           </p>

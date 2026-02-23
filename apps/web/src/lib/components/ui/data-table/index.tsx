@@ -16,11 +16,13 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  EyeIcon,
   MoreHorizontal,
   Search,
 } from 'lucide-react'
 import * as React from 'react'
 
+import { Link } from '@tanstack/react-router'
 import { Button } from '~/lib/components/ui/button'
 import { Checkbox } from '~/lib/components/ui/checkbox'
 import {
@@ -72,6 +74,7 @@ export interface DataTableProps<TData> {
     title: string
     subtitle: string
   }
+  getRowLink?: (item: TData) => string
 }
 
 export function DataTable<TData>({
@@ -91,6 +94,7 @@ export function DataTable<TData>({
   onSortingChange,
   rowCount,
   emptyState,
+  getRowLink,
 }: DataTableProps<TData>) {
   // Create the select column
   const selectColumn: ColumnDef<TData> = {
@@ -122,32 +126,16 @@ export function DataTable<TData>({
     enableHiding: false,
     cell: ({ row }) => {
       const item = row.original
-
+      const button = (
+        <Button variant="outline" size="sm">
+          <EyeIcon />
+          Details
+        </Button>
+      )
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-8 h-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              // We'll need to adapt this to be more generic
-              onClick={() => {
-                const itemId =
-                  typeof item === 'object' && item !== null && 'id' in item ? String(item.id) : ''
-                navigator.clipboard.writeText(itemId)
-              }}
-            >
-              Copy ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          {getRowLink ? <Link to={getRowLink(item)}>{button}</Link> : button}
+        </div>
       )
     },
   }

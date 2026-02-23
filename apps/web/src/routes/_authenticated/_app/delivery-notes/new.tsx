@@ -130,7 +130,7 @@ const NewDeliveryNotePage = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/delivery-notes/overview' })}>
             <ArrowLeftIcon className="h-5 w-5" />
           </Button>
-          <h2 className="text-2xl font-bold">Neuer Lieferschein</h2>
+          <h2 className="text-2xl">Neuer Lieferschein</h2>
         </div>
 
         <LieferscheinForm
